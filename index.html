@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
-  <!-- Google Maps loaded dynamically via async bootstrap in <script> below -->
   <style>
     * {
       margin: 0;
@@ -234,27 +233,8 @@
       font-weight: 600;
     }
 
-    .flight-map {
-      background: white;
-      border-radius: 15px;
-      padding: 15px;
-      margin: 15px 0;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
 
-    #map {
-      border-radius: 10px;
-      overflow: hidden;
-      height: 250px;
-    }
 
-    .map-status {
-      text-align: center;
-      font-size: 13px;
-      color: #666;
-      margin-top: 10px;
-      font-weight: 600;
-    }
 
     .city-info-container {
       display: grid;
@@ -436,17 +416,8 @@
         font-size: 13px;
       }
 
-      .flight-map {
-        padding: 15px;
-      }
 
-      #map {
-        height: 250px;
-      }
 
-      .map-status {
-        font-size: 12px;
-      }
 
       .flight-progress {
         padding: 15px;
@@ -595,10 +566,6 @@
       </div>
     </div>
 
-    <div class="flight-map">
-      <div id="map" style="width: 100%; height: 300px; border-radius: 10px;"></div>
-      <div class="map-status" id="mapStatus">Flight departs in 31 days</div>
-    </div>
 
     <div class="city-info-container">
       <div class="city-info">
@@ -631,14 +598,6 @@
   </audio>
 
   <script>
-    // --- Async Google Maps bootstrap (best-practice loading pattern) ---
-    (function() {
-      const s = document.createElement('script');
-      s.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly&loading=async';
-      s.async = true;
-      document.head.appendChild(s);
-    })();
-
     // Flight details
     const departure = new Date('2026-03-04T10:15:00-05:00');
     const arrival = new Date('2026-03-04T22:10:00+00:00');
@@ -732,177 +691,10 @@
       // Update local times
       updateTimes();
       
-      // Update flight map status
-      updateMapStatus(now);
     }
 
-    let map;
-    let flightPath;
-    let planeMarker;
-
-    function initMap() {
-      // Guard: if the API key was blocked, google.maps.Map won't exist.
-      // Show a friendly fallback instead of crashing.
-      if (typeof google === 'undefined' || !google.maps || !google.maps.Map) {
-        document.getElementById('map').innerHTML =
-          '<div style="height:100%;display:flex;align-items:center;justify-content:center;' +
-          'background:#fff0f3;border-radius:10px;color:#e75480;font-weight:600;font-size:14px;text-align:center;padding:20px;">' +
-          '🗺️ Map unavailable<br><span style="font-size:12px;color:#999;font-weight:400;margin-top:6px;">' +
-          'JFK ✈️ → LHR</span></div>';
-        return;
-      }
-
-      // JFK and Heathrow coordinates
-      const jfk = { lat: 40.6413, lng: -73.7781 };
-      const lhr = { lat: 51.4700, lng: -0.4543 };
-      
-      // Create map centered on Atlantic
-      map = new google.maps.Map(document.getElementById('map'), {
-        mapTypeId: 'terrain',
-        styles: [
-          {
-            featureType: 'water',
-            elementType: 'geometry',
-            stylers: [{ color: '#e3f2fd' }]
-          }
-        ]
-      });
-      
-      // Auto-fit bounds to show entire flight path
-      const bounds = new google.maps.LatLngBounds();
-      bounds.extend(jfk);
-      bounds.extend(lhr);
-      map.fitBounds(bounds);
-      
-      // Add some padding but zoom in a bit for better view
-      setTimeout(() => {
-        const currentZoom = map.getZoom();
-        map.setZoom(currentZoom + 0.6);
-      }, 100);
-      
-      // Draw curved flight path
-      const flightPlanCoordinates = [
-        jfk,
-        { lat: 45, lng: -60 },  // Mid-Atlantic point
-        { lat: 53, lng: -30 },  // Another curve point
-        lhr
-      ];
-      
-      flightPath = new google.maps.Polyline({
-        path: flightPlanCoordinates,
-        geodesic: true,
-        strokeColor: '#e75480',
-        strokeOpacity: 0.6,
-        strokeWeight: 3,
-        icons: [{
-          icon: {
-            path: 'M 0,-1 0,1',
-            strokeOpacity: 1,
-            scale: 3
-          },
-          offset: '0',
-          repeat: '20px'
-        }]
-      });
-      
-      flightPath.setMap(map);
-
-      // Use AdvancedMarkerElement if available (modern), fall back to Marker (still works)
-      const useAdvanced = google.maps.marker && google.maps.marker.AdvancedMarkerElement;
-
-      function makeMarker(position, title, emoji, size, zIndex) {
-        if (useAdvanced) {
-          const el = document.createElement('div');
-          el.style.cssText = 'font-size:' + size + 'px;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));';
-          el.textContent = emoji;
-          return new google.maps.marker.AdvancedMarkerElement({
-            position: position,
-            map: map,
-            title: title,
-            content: el,
-            zIndex: zIndex || 0
-          });
-        }
-        return new google.maps.Marker({
-          position: position,
-          map: map,
-          title: title,
-          label: { text: emoji, fontSize: size + 'px' },
-          zIndex: zIndex || 0
-        });
-      }
-      
-      // JFK marker
-      makeMarker(jfk, 'JFK Airport, New York', '🇺🇸', 20);
-      
-      // Heathrow marker
-      makeMarker(lhr, 'Heathrow Airport, London', '🇬🇧', 20);
-      
-      // Plane marker (initially at JFK)
-      planeMarker = makeMarker(jfk, 'Flight Position', '✈️', 24, 1000);
-      
-      // Start updating plane position
-      setInterval(updatePlanePosition, 1000);
-    }
     
-    function updatePlanePosition() {
-      if (!planeMarker) return; // map may not have loaded
-      const now = new Date();
-      const jfk = { lat: 40.6413, lng: -73.7781 };
-      const lhr = { lat: 51.4700, lng: -0.4543 };
 
-      let target;
-      
-      if (now >= departure && now < arrival) {
-        // During flight - animate plane position
-        const flightDuration = arrival - departure;
-        const flightElapsed = now - departure;
-        const progress = flightElapsed / flightDuration;
-        
-        // Interpolate along the curved path
-        let lat, lng;
-        if (progress < 0.33) {
-          const t = progress / 0.33;
-          lat = jfk.lat + (45 - jfk.lat) * t;
-          lng = jfk.lng + (-60 - jfk.lng) * t;
-        } else if (progress < 0.66) {
-          const t = (progress - 0.33) / 0.33;
-          lat = 45 + (53 - 45) * t;
-          lng = -60 + (-30 - (-60)) * t;
-        } else {
-          const t = (progress - 0.66) / 0.34;
-          lat = 53 + (lhr.lat - 53) * t;
-          lng = -30 + (lhr.lng - (-30)) * t;
-        }
-        target = { lat, lng };
-      } else if (now >= arrival) {
-        target = lhr;
-      } else {
-        target = jfk;
-      }
-
-      // Works for both marker types
-      if (typeof planeMarker.setPosition === 'function') {
-        planeMarker.setPosition(target);
-      } else {
-        planeMarker.position = target;
-      }
-    }
-
-    function updateMapStatus(now) {
-      const mapStatus = document.getElementById('mapStatus');
-      
-      if (now < departure) {
-        const daysUntil = Math.floor((departure - now) / (1000 * 60 * 60 * 24));
-        mapStatus.textContent = `Flight departs in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`;
-      } else if (now < arrival) {
-        const hoursRemaining = Math.floor((arrival - now) / (1000 * 60 * 60));
-        const minutesRemaining = Math.floor(((arrival - now) % (1000 * 60 * 60)) / (1000 * 60));
-        mapStatus.textContent = `✈️ In flight - ${hoursRemaining}h ${minutesRemaining}m until landing`;
-      } else {
-        mapStatus.textContent = '🎉 Landed at Heathrow!';
-      }
-    }
 
     function updateTimes() {
       const now = new Date();
