@@ -1,140 +1,1115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JFK ✈️ LHR Arrival Countdown ❤️</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beatrix Countdown ✈️</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly" defer></script>
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #ffdde1, #ee9ca7);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .card {
-      background: white;
-      border-radius: 24px;
-      padding: 28px 24px;
-      max-width: 460px;
+    /* Particle canvas */
+    #particles {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-      text-align: center;
-      animation: float 6s ease-in-out infinite;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
     }
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
+    .container {
+      background: white;
+      border-radius: 30px;
+      padding: 40px 30px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+      position: relative;
+      z-index: 10;
     }
 
     h1 {
       color: #e75480;
+      font-size: 32px;
       margin-bottom: 10px;
-      font-size: clamp(22px, 5vw, 28px);
+      font-family: 'Pacifico', cursive;
+      font-weight: 400;
     }
 
-    .details {
-      font-size: clamp(13px, 3.5vw, 14px);
+    .subtitle {
       color: #666;
-      margin-bottom: 18px;
-      line-height: 1.6;
+      font-size: 16px;
+      margin-bottom: 30px;
     }
 
     .countdown {
-      margin-top: 20px;
-      font-size: clamp(22px, 6vw, 26px);
-      font-weight: 700;
-      color: #333;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 20px 0;
     }
 
-    .sub {
-      font-size: clamp(13px, 3.5vw, 14px);
-      color: #777;
-      margin-top: 6px;
+    .time-box {
+      background: linear-gradient(135deg, #fff0f3 0%, #ffe9ec 100%);
+      border-radius: 20px;
+      padding: 20px 10px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(231, 84, 128, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .hearts {
-      font-size: clamp(30px, 8vw, 36px);
-      margin-top: 16px;
+    .time-box::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: rotate(45deg);
+      animation: shine 3s infinite;
     }
 
-    .timezone {
-      margin-top: 14px;
+    @keyframes shine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .time-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(231, 84, 128, 0.35);
+    }
+
+    /* Pulsing effect when under 24 hours */
+    .time-box.urgent {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 15px rgba(231, 84, 128, 0.2);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 8px 30px rgba(231, 84, 128, 0.5);
+      }
+    }
+
+    .time-box.urgent .number {
+      animation: numberPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes numberPulse {
+      0%, 100% {
+        filter: drop-shadow(0 2px 4px rgba(231, 84, 128, 0.15));
+      }
+      50% {
+        filter: drop-shadow(0 4px 12px rgba(231, 84, 128, 0.6));
+      }
+    }
+
+    .time-box.urgent:hover {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .number {
+      font-size: 36px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #e75480, #ff6b9d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 2px 10px rgba(231, 84, 128, 0.2);
+      filter: drop-shadow(0 2px 4px rgba(231, 84, 128, 0.15));
+    }
+
+    .label {
       font-size: 12px;
-      color: #888;
+      color: #999;
+      text-transform: uppercase;
+      margin-top: 5px;
+      letter-spacing: 1px;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
     }
 
-    @media (max-width: 380px) {
-      .card {
-        padding: 22px 18px;
-        border-radius: 20px;
+    .info {
+      background: #fff9e6;
+      border-radius: 15px;
+      padding: 12px;
+      margin: 15px 0;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .flight-progress {
+      background: linear-gradient(135deg, #fff0f3, #ffe9ec);
+      border-radius: 15px;
+      padding: 15px;
+      margin: 15px 0;
+      border: 2px solid #e75480;
+    }
+
+    .flight-progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 600;
+      color: #e75480;
+      margin-bottom: 12px;
+    }
+
+    .flight-progress-bar {
+      position: relative;
+      width: 100%;
+      height: 20px;
+      background: white;
+      border-radius: 10px;
+      overflow: visible;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .flight-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #e75480, #ff6b9d);
+      border-radius: 10px;
+      transition: width 1s ease;
+      box-shadow: 0 0 10px rgba(231,84,128,0.5);
+    }
+
+    .flight-progress-plane {
+      position: absolute;
+      top: -2px;
+      left: 0;
+      font-size: 24px;
+      transition: left 1s ease;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      animation: bobbing 2s ease-in-out infinite;
+    }
+
+    @keyframes bobbing {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-3px); }
+    }
+
+    .flight-progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #666;
+      margin-top: 8px;
+    }
+
+    .flight-progress-labels span:nth-child(2) {
+      color: #e75480;
+      font-weight: 600;
+    }
+
+    .flight-map {
+      background: white;
+      border-radius: 15px;
+      padding: 15px;
+      margin: 15px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    #map {
+      border-radius: 10px;
+      overflow: hidden;
+      height: 250px;
+    }
+
+    .map-status {
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+      margin-top: 10px;
+      font-weight: 600;
+    }
+
+    .city-info-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .city-info {
+      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+      border-radius: 15px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .city-header {
+      font-size: 14px;
+      font-weight: 600;
+      color: #0284c7;
+      margin-bottom: 8px;
+    }
+
+    .city-time {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0c4a6e;
+      margin-bottom: 5px;
+    }
+
+    .city-weather {
+      font-size: 14px;
+      color: #0369a1;
+      font-weight: 600;
+    }
+
+    .weather-icon-small {
+      font-size: 16px;
+      margin-right: 3px;
+    }
+
+    .status {
+      font-size: 16px;
+      color: #e75480;
+      font-weight: 600;
+      margin: 20px 0;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .control-btn {
+      background: linear-gradient(135deg, #fff0f3, #ffe9ec);
+      border: 2px solid #e75480;
+      border-radius: 25px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #e75480;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      box-shadow: 0 2px 10px rgba(231, 84, 128, 0.15);
+    }
+
+    .control-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(231, 84, 128, 0.3);
+      background: linear-gradient(135deg, #ffe9ec, #ffd9e0);
+    }
+
+    .control-btn:active {
+      transform: translateY(0);
+    }
+
+    .control-btn.active {
+      background: linear-gradient(135deg, #e75480, #ff6b9d);
+      color: white;
+      border-color: #e75480;
+    }
+
+    .percentage {
+      margin: 15px 0;
+    }
+
+    .percent-bar {
+      width: 100%;
+      height: 12px;
+      background: #f0f0f0;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .percent-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ee9ca7, #e75480);
+      border-radius: 10px;
+      transition: width 1s ease;
+      box-shadow: 0 0 10px rgba(231,84,128,0.5);
+    }
+
+    .percent-text {
+      font-size: 14px;
+      color: #666;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 600px) {
+      .container {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+
+      .subtitle {
+        font-size: 14px;
+      }
+
+      .countdown {
+        gap: 10px;
+      }
+
+      .time-box {
+        padding: 15px 5px;
+        border-radius: 18px;
+      }
+
+      /* Reduce pulse intensity on mobile for better performance */
+      .time-box.urgent {
+        animation: pulseMobile 2s ease-in-out infinite;
+      }
+
+      @keyframes pulseMobile {
+        0%, 100% {
+          transform: scale(1);
+          box-shadow: 0 4px 15px rgba(231, 84, 128, 0.2);
+        }
+        50% {
+          transform: scale(1.03);
+          box-shadow: 0 6px 20px rgba(231, 84, 128, 0.4);
+        }
+      }
+
+      .time-box::before {
+        animation: shine 4s infinite;
+      }
+
+      .number {
+        font-size: 28px;
+      }
+
+      .label {
+        font-size: 10px;
+      }
+
+      .info {
+        font-size: 13px;
+        padding: 12px;
+      }
+
+      .times {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .clock {
+        font-size: 20px;
+      }
+
+      .percent-text {
+        font-size: 13px;
+      }
+
+      .flight-map {
+        padding: 15px;
+      }
+
+      #map {
+        height: 250px;
+      }
+
+      .map-status {
+        font-size: 12px;
+      }
+
+      .flight-progress {
+        padding: 15px;
+      }
+
+      .flight-progress-header {
+        font-size: 12px;
+        flex-direction: column;
+        gap: 5px;
+        text-align: center;
+      }
+
+      .flight-progress-labels {
+        font-size: 11px;
+      }
+
+      .controls {
+        margin: 15px 0;
+      }
+
+      .control-btn {
+        font-size: 13px;
+        padding: 8px 16px;
+      }
+
+      .city-info-container {
+        gap: 10px;
+      }
+
+      .city-info {
+        padding: 12px;
+      }
+
+      .city-time {
+        font-size: 18px;
+      }
+
+      .city-weather {
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .countdown {
+        gap: 8px;
+      }
+
+      .time-box {
+        padding: 12px 3px;
+      }
+
+      .number {
+        font-size: 24px;
+      }
+
+      .label {
+        font-size: 9px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+    }
+
+    /* Landscape mobile */
+    @media (max-height: 600px) and (orientation: landscape) {
+      .container {
+        padding: 20px 15px;
+        max-width: 90vw;
+      }
+
+      .countdown {
+        margin: 15px 0;
+      }
+
+      .time-box {
+        padding: 10px 5px;
+      }
+
+      .info {
+        margin: 15px 0;
+        padding: 10px;
+        font-size: 12px;
+      }
+
+      .times {
+        margin: 15px 0;
       }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>✈️ JFK → LHR 🇺🇸❤️🇬🇧</h1>
+  <canvas id="particles"></canvas>
+  <div class="container">
+    <h1>✈️ JFK → LHR</h1>
+    <div class="subtitle">See you soon, <strong>Beatrix</strong> 💕</div>
 
-    <div class="details">
-      <strong>Departure:</strong> Wed, 04 March 2026 – 10:15<br />
-      John F. Kennedy Airport (JFK), Terminal 8<br /><br />
-
-      <strong>Arrival:</strong> Wed, 11 March 2026 – 11:20<br />
-      Heathrow Airport (LHR), Terminal 5
+    <div class="countdown">
+      <div class="time-box">
+        <span class="number" id="days">--</span>
+        <span class="label">Days</span>
+      </div>
+      <div class="time-box">
+        <span class="number" id="hours">--</span>
+        <span class="label">Hours</span>
+      </div>
+      <div class="time-box">
+        <span class="number" id="minutes">--</span>
+        <span class="label">Minutes</span>
+      </div>
+      <div class="time-box">
+        <span class="number" id="seconds">--</span>
+        <span class="label">Seconds</span>
+      </div>
     </div>
 
-    <div class="countdown" id="countdown"></div>
-    <div class="sub" id="flightStatus"></div>
-    <div class="hearts" id="hearts">❤️ ✈️ ❤️</div>
-    <div class="timezone">Time zones handled automatically (NY → London)</div>
+    <div class="status" id="status">⏰ Counting down...</div>
+
+    <div class="percentage" id="percentage">
+      <div class="percent-bar">
+        <div class="percent-fill" id="percentFill"></div>
+      </div>
+      <div class="percent-text" id="percentText">0% of the wait complete</div>
+    </div>
+
+    <div class="info">
+      <strong>Departure:</strong> Wed, March 4, 2026 at 10:15 AM (EST)<br>
+      JFK Terminal 8 → Heathrow Terminal 3<br>
+      <strong>Arrival:</strong> Same day at 10:10 PM (GMT) London time<br>
+      <strong>Flight Duration:</strong> <span style="color: #e75480; font-weight: bold;">7 hours 55 minutes</span>
+    </div>
+
+    <div class="flight-progress" id="flightProgress" style="display: none;">
+      <div class="flight-progress-header">
+        <span>✈️ Flight in Progress</span>
+        <span id="flightTimeRemaining">--h --m remaining</span>
+      </div>
+      <div class="flight-progress-bar">
+        <div class="flight-progress-fill" id="flightProgressFill"></div>
+        <div class="flight-progress-plane">✈️</div>
+      </div>
+      <div class="flight-progress-labels">
+        <span>🇺🇸 JFK</span>
+        <span id="flightProgressPercent">0%</span>
+        <span>🇬🇧 LHR</span>
+      </div>
+    </div>
+
+    <div class="flight-map">
+      <div id="map" style="width: 100%; height: 300px; border-radius: 10px;"></div>
+      <div class="map-status" id="mapStatus">Flight departs in 31 days</div>
+    </div>
+
+    <div class="city-info-container">
+      <div class="city-info">
+        <div class="city-header">🇺🇸 New York</div>
+        <div class="city-time" id="nyTime">--:--</div>
+        <div class="city-weather">
+          <span class="weather-icon-small" id="nyWeatherIcon">🌤️</span>
+          <span id="nyTemp">--°</span>
+        </div>
+      </div>
+      <div class="city-info">
+        <div class="city-header">🇬🇧 London</div>
+        <div class="city-time" id="lonTime">--:--</div>
+        <div class="city-weather">
+          <span class="weather-icon-small" id="lonWeatherIcon">🌤️</span>
+          <span id="lonTemp">--°</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="control-btn" id="musicBtn" onclick="toggleMusic()">
+        🔇 Music: OFF
+      </button>
+    </div>
   </div>
 
-  <script>
-    /*
-      Flight details with explicit time zones
-      JFK: America/New_York
-      LHR: Europe/London
-    */
+  <audio id="bgMusic" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_d1718ab41b.mp3" type="audio/mpeg">
+  </audio>
 
-    const departureNY = new Date('2026-03-04T10:15:00-05:00'); // New York (EST)
-    const arrivalLondon = new Date('2026-03-11T11:20:00+00:00'); // London (GMT)
+  <script>
+    // Flight details
+    const departure = new Date('2026-03-04T10:15:00-05:00');
+    const arrival = new Date('2026-03-04T22:10:00+00:00');
+    
+    // Ticket purchase date - the real start of the countdown
+    const countdownStart = new Date('2026-01-28T18:50:00+00:00');
 
     function updateCountdown() {
       const now = new Date();
+      let timeLeft;
 
-      if (now < departureNY) {
-        const diff = departureNY - now;
-        render(diff, 'Until takeoff from JFK ✈️');
-      } else if (now >= departureNY && now < arrivalLondon) {
-        const diff = arrivalLondon - now;
-        render(diff, 'She is in the air 💕');
+      // Calculate what to count down to
+      if (now < departure) {
+        timeLeft = departure - now;
+        document.getElementById('status').textContent = '✈️ Until takeoff from JFK Terminal 8';
+      } else if (now < arrival) {
+        timeLeft = arrival - now;
+        document.getElementById('status').textContent = '✈️ She is in the air right now!';
       } else {
-        document.getElementById('countdown').innerHTML = "She's arrived! 💖 Welcome to the UK!";
-        document.getElementById('flightStatus').innerHTML = "Heathrow Terminal 5 🥰";
-        document.getElementById('hearts').innerHTML = "🇬🇧❤️🇺🇸";
-        return;
+        timeLeft = 0;
+        document.getElementById('status').textContent = '🎉 She has arrived in London!';
+      }
+
+      // Calculate time units
+      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+      // Update display
+      document.getElementById('days').textContent = days;
+      document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+      document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+      document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+
+      // Add pulsing effect when under 24 hours
+      const timeBoxes = document.querySelectorAll('.time-box');
+      const totalHoursLeft = days * 24 + hours;
+      
+      if (totalHoursLeft < 24 && timeLeft > 0) {
+        timeBoxes.forEach(box => box.classList.add('urgent'));
+      } else {
+        timeBoxes.forEach(box => box.classList.remove('urgent'));
+      }
+
+      // Calculate percentage complete
+      const totalWaitTime = departure - countdownStart;
+      const timeElapsed = now - countdownStart;
+      let percentComplete = 0;
+      
+      if (now >= arrival) {
+        percentComplete = 100;
+        document.getElementById('flightProgress').style.display = 'none';
+      } else if (now >= departure) {
+        // During flight: show 90-100% based on flight progress
+        const flightDuration = arrival - departure;
+        const flightElapsed = now - departure;
+        percentComplete = 90 + (flightElapsed / flightDuration) * 10;
+        
+        // Show flight progress indicator
+        const flightProgressDiv = document.getElementById('flightProgress');
+        flightProgressDiv.style.display = 'block';
+        
+        const flightPercent = (flightElapsed / flightDuration) * 100;
+        document.getElementById('flightProgressFill').style.width = flightPercent + '%';
+        document.getElementById('flightProgressPlane').style.left = `calc(${flightPercent}% - 12px)`;
+        document.getElementById('flightProgressPercent').textContent = Math.round(flightPercent) + '%';
+        
+        const hoursLeft = Math.floor((arrival - now) / (1000 * 60 * 60));
+        const minutesLeft = Math.floor(((arrival - now) % (1000 * 60 * 60)) / (1000 * 60));
+        document.getElementById('flightTimeRemaining').textContent = `${hoursLeft}h ${minutesLeft}m remaining`;
+      } else if (now >= countdownStart) {
+        // Before departure: show 0-90% based on wait time
+        percentComplete = (timeElapsed / totalWaitTime) * 90;
+        document.getElementById('flightProgress').style.display = 'none';
+      }
+      
+      percentComplete = Math.max(0, Math.min(100, percentComplete));
+      
+      // Update percentage display
+      document.getElementById('percentFill').style.width = percentComplete + '%';
+      
+      if (percentComplete >= 100) {
+        document.getElementById('percentText').textContent = '🎉 100% complete - The wait is over!';
+      } else if (percentComplete >= 90) {
+        document.getElementById('percentText').textContent = Math.round(percentComplete) + '% complete - Almost there!';
+      } else {
+        document.getElementById('percentText').textContent = Math.round(percentComplete) + '% of the wait complete';
+      }
+
+      // Update local times
+      updateTimes();
+      
+      // Update flight map status
+      updateMapStatus(now);
+    }
+
+    let map;
+    let flightPath;
+    let planeMarker;
+    
+    function initMap() {
+      // JFK and Heathrow coordinates
+      const jfk = { lat: 40.6413, lng: -73.7781 };
+      const lhr = { lat: 51.4700, lng: -0.4543 };
+      
+      // Create map centered on Atlantic
+      map = new google.maps.Map(document.getElementById('map'), {
+        mapTypeId: 'terrain',
+        styles: [
+          {
+            featureType: 'water',
+            elementType: 'geometry',
+            stylers: [{ color: '#e3f2fd' }]
+          }
+        ]
+      });
+      
+      // Auto-fit bounds to show entire flight path
+      const bounds = new google.maps.LatLngBounds();
+      bounds.extend(jfk);
+      bounds.extend(lhr);
+      map.fitBounds(bounds);
+      
+      // Add some padding but zoom in a bit for better view
+      setTimeout(() => {
+        const currentZoom = map.getZoom();
+        map.setZoom(currentZoom + 0.6);
+      }, 100);
+      
+      // Draw curved flight path
+      const flightPlanCoordinates = [
+        jfk,
+        { lat: 45, lng: -60 },  // Mid-Atlantic point
+        { lat: 53, lng: -30 },  // Another curve point
+        lhr
+      ];
+      
+      flightPath = new google.maps.Polyline({
+        path: flightPlanCoordinates,
+        geodesic: true,
+        strokeColor: '#e75480',
+        strokeOpacity: 0.6,
+        strokeWeight: 3,
+        icons: [{
+          icon: {
+            path: 'M 0,-1 0,1',
+            strokeOpacity: 1,
+            scale: 3
+          },
+          offset: '0',
+          repeat: '20px'
+        }]
+      });
+      
+      flightPath.setMap(map);
+      
+      // JFK marker
+      new google.maps.Marker({
+        position: jfk,
+        map: map,
+        title: 'JFK Airport, New York',
+        label: {
+          text: '🇺🇸',
+          fontSize: '20px'
+        }
+      });
+      
+      // Heathrow marker
+      new google.maps.Marker({
+        position: lhr,
+        map: map,
+        title: 'Heathrow Airport, London',
+        label: {
+          text: '🇬🇧',
+          fontSize: '20px'
+        }
+      });
+      
+      // Plane marker (initially at JFK)
+      planeMarker = new google.maps.Marker({
+        position: jfk,
+        map: map,
+        title: 'Flight Position',
+        label: {
+          text: '✈️',
+          fontSize: '24px'
+        },
+        zIndex: 1000
+      });
+      
+      // Start updating plane position
+      setInterval(updatePlanePosition, 1000);
+    }
+    
+    function updatePlanePosition() {
+      const now = new Date();
+      const jfk = { lat: 40.6413, lng: -73.7781 };
+      const lhr = { lat: 51.4700, lng: -0.4543 };
+      
+      if (now >= departure && now < arrival) {
+        // During flight - animate plane position
+        const flightDuration = arrival - departure;
+        const flightElapsed = now - departure;
+        const progress = flightElapsed / flightDuration;
+        
+        // Interpolate along the curved path
+        let lat, lng;
+        if (progress < 0.33) {
+          // First segment: JFK to mid-Atlantic
+          const t = progress / 0.33;
+          lat = jfk.lat + (45 - jfk.lat) * t;
+          lng = jfk.lng + (-60 - jfk.lng) * t;
+        } else if (progress < 0.66) {
+          // Second segment: mid-Atlantic to approach
+          const t = (progress - 0.33) / 0.33;
+          lat = 45 + (53 - 45) * t;
+          lng = -60 + (-30 - (-60)) * t;
+        } else {
+          // Final segment: approach to LHR
+          const t = (progress - 0.66) / 0.34;
+          lat = 53 + (lhr.lat - 53) * t;
+          lng = -30 + (lhr.lng - (-30)) * t;
+        }
+        
+        planeMarker.setPosition({ lat, lng });
+      } else if (now >= arrival) {
+        // Landed at Heathrow
+        planeMarker.setPosition(lhr);
+      } else {
+        // Before departure - at JFK
+        planeMarker.setPosition(jfk);
       }
     }
 
-    function render(diff, label) {
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((diff / (1000 * 60)) % 60);
-      const seconds = Math.floor((diff / 1000) % 60);
-
-      document.getElementById('countdown').innerHTML =
-        `${days}d ${hours}h ${minutes}m ${seconds}s`;
-      document.getElementById('flightStatus').innerHTML = label;
+    function updateMapStatus(now) {
+      const mapStatus = document.getElementById('mapStatus');
+      
+      if (now < departure) {
+        const daysUntil = Math.floor((departure - now) / (1000 * 60 * 60 * 24));
+        mapStatus.textContent = `Flight departs in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`;
+      } else if (now < arrival) {
+        const hoursRemaining = Math.floor((arrival - now) / (1000 * 60 * 60));
+        const minutesRemaining = Math.floor(((arrival - now) % (1000 * 60 * 60)) / (1000 * 60));
+        mapStatus.textContent = `✈️ In flight - ${hoursRemaining}h ${minutesRemaining}m until landing`;
+      } else {
+        mapStatus.textContent = '🎉 Landed at Heathrow!';
+      }
     }
 
+    function updateTimes() {
+      const now = new Date();
+      
+      // New York time
+      const nyTime = now.toLocaleTimeString('en-US', {
+        timeZone: 'America/New_York',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+      document.getElementById('nyTime').textContent = nyTime;
+
+      // London time
+      const lonTime = now.toLocaleTimeString('en-US', {
+        timeZone: 'Europe/London',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+      document.getElementById('lonTime').textContent = lonTime;
+    }
+
+    // Weather functionality
+    function getWeatherIcon(weatherCode, isDay) {
+      // WMO Weather codes to emoji mapping
+      const weatherIcons = {
+        0: isDay ? '☀️' : '🌙',  // Clear
+        1: isDay ? '🌤️' : '🌙',  // Mainly clear
+        2: '⛅',  // Partly cloudy
+        3: '☁️',  // Overcast
+        45: '🌫️', // Fog
+        48: '🌫️', // Rime fog
+        51: '🌦️', // Light drizzle
+        53: '🌦️', // Moderate drizzle
+        55: '🌧️', // Dense drizzle
+        61: '🌧️', // Slight rain
+        63: '🌧️', // Moderate rain
+        65: '⛈️', // Heavy rain
+        71: '🌨️', // Slight snow
+        73: '🌨️', // Moderate snow
+        75: '❄️', // Heavy snow
+        77: '🌨️', // Snow grains
+        80: '🌦️', // Slight rain showers
+        81: '🌧️', // Moderate rain showers
+        82: '⛈️', // Violent rain showers
+        85: '🌨️', // Slight snow showers
+        86: '❄️', // Heavy snow showers
+        95: '⛈️', // Thunderstorm
+        96: '⛈️', // Thunderstorm with hail
+        99: '⛈️'  // Thunderstorm with heavy hail
+      };
+      return weatherIcons[weatherCode] || '🌤️';
+    }
+
+    function getWeatherDescription(weatherCode) {
+      const descriptions = {
+        0: 'Clear sky',
+        1: 'Mainly clear',
+        2: 'Partly cloudy',
+        3: 'Overcast',
+        45: 'Foggy',
+        48: 'Foggy',
+        51: 'Light drizzle',
+        53: 'Drizzle',
+        55: 'Heavy drizzle',
+        61: 'Light rain',
+        63: 'Rain',
+        65: 'Heavy rain',
+        71: 'Light snow',
+        73: 'Snow',
+        75: 'Heavy snow',
+        77: 'Snow grains',
+        80: 'Light showers',
+        81: 'Rain showers',
+        82: 'Heavy showers',
+        85: 'Snow showers',
+        86: 'Heavy snow showers',
+        95: 'Thunderstorm',
+        96: 'Thunderstorm',
+        99: 'Severe thunderstorm'
+      };
+      return descriptions[weatherCode] || 'Unknown';
+    }
+
+    async function fetchWeather() {
+      try {
+        // New York weather (JFK coordinates)
+        const nyResponse = await fetch('https://api.open-meteo.com/v1/forecast?latitude=40.6413&longitude=-73.7781&current=temperature_2m,weather_code,is_day&temperature_unit=fahrenheit&timezone=America/New_York');
+        const nyData = await nyResponse.json();
+        
+        if (nyData.current) {
+          document.getElementById('nyTemp').textContent = Math.round(nyData.current.temperature_2m) + '°F';
+          document.getElementById('nyWeatherIcon').textContent = getWeatherIcon(nyData.current.weather_code, nyData.current.is_day);
+        }
+
+        // London weather (Heathrow coordinates)
+        const lonResponse = await fetch('https://api.open-meteo.com/v1/forecast?latitude=51.4700&longitude=-0.4543&current=temperature_2m,weather_code,is_day&temperature_unit=celsius&timezone=Europe/London');
+        const lonData = await lonResponse.json();
+        
+        if (lonData.current) {
+          document.getElementById('lonTemp').textContent = Math.round(lonData.current.temperature_2m) + '°C';
+          document.getElementById('lonWeatherIcon').textContent = getWeatherIcon(lonData.current.weather_code, lonData.current.is_day);
+        }
+      } catch (error) {
+        console.error('Weather fetch error:', error);
+      }
+    }
+
+    // Fetch weather immediately and then every 10 minutes
+    fetchWeather();
+    setInterval(fetchWeather, 600000);
+
+    // Update immediately and then every second
     updateCountdown();
     setInterval(updateCountdown, 1000);
+
+    // Particle effects - Floating hearts and sparkles
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = [];
+    const particleCount = 30;
+
+    class Particle {
+      constructor() {
+        this.reset();
+        this.y = Math.random() * canvas.height;
+        this.fadeDelay = Math.random() * 600;
+        this.fadeStart = Date.now() + this.fadeDelay;
+        this.symbol = Math.random() > 0.5 ? '♥' : '✨';
+      }
+
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 10;
+        this.speed = 0.3 + Math.random() * 0.5;
+        this.opacity = 0;
+        this.size = 10 + Math.random() * 10;
+        this.drift = Math.random() * 0.5 - 0.25;
+        this.symbol = Math.random() > 0.5 ? '♥' : '✨';
+        this.fadeDelay = Math.random() * 600;
+        this.fadeStart = Date.now() + this.fadeDelay;
+      }
+
+      update() {
+        this.y -= this.speed;
+        this.x += this.drift;
+
+        if (Date.now() > this.fadeStart) {
+          if (this.opacity < 0.6) {
+            this.opacity += 0.005;
+          }
+        }
+
+        if (this.y < -20) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.opacity;
+        ctx.font = `${this.size}px Arial`;
+        ctx.fillStyle = this.symbol === '♥' ? '#e75480' : '#ffb3c1';
+        ctx.fillText(this.symbol, this.x, this.y);
+        ctx.restore();
+      }
+    }
+
+    // Create particles
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      particles.forEach(particle => {
+        particle.update();
+        particle.draw();
+      });
+
+      requestAnimationFrame(animateParticles);
+    }
+
+    animateParticles();
+
+    // Resize canvas on window resize
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    // Music control functionality
+    let musicPlaying = false;
+    const bgMusic = document.getElementById('bgMusic');
+    const musicBtn = document.getElementById('musicBtn');
+
+    // Load music preference from localStorage
+    const savedMusicPref = localStorage.getItem('musicPreference');
+    if (savedMusicPref === 'on') {
+      // Don't auto-play, just prepare to play on user interaction
+      musicBtn.textContent = '🔇 Music: OFF (click to enable)';
+    }
+
+    function toggleMusic() {
+      musicPlaying = !musicPlaying;
+      
+      if (musicPlaying) {
+        bgMusic.volume = 0.3;
+        bgMusic.play().then(() => {
+          musicBtn.textContent = '🔊 Music: ON';
+          musicBtn.classList.add('active');
+          localStorage.setItem('musicPreference', 'on');
+        }).catch(err => {
+          console.log('Music playback failed:', err);
+          musicPlaying = false;
+          musicBtn.textContent = '🔇 Music: OFF';
+          musicBtn.classList.remove('active');
+        });
+      } else {
+        bgMusic.pause();
+        musicBtn.textContent = '🔇 Music: OFF';
+        musicBtn.classList.remove('active');
+        localStorage.setItem('musicPreference', 'off');
+      }
+    }
   </script>
 </body>
 </html>
