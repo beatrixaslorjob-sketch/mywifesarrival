@@ -739,16 +739,19 @@
     let map;
     let flightPath;
     let planeMarker;
-    
-    // Helper: create a styled DOMElement for AdvancedMarkerElement
-    function createMarkerElement(emoji, size) {
-      const el = document.createElement('div');
-      el.style.cssText = `font-size:${size}px;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));`;
-      el.textContent = emoji;
-      return el;
-    }
 
     function initMap() {
+      // Guard: if the API key was blocked, google.maps.Map won't exist.
+      // Show a friendly fallback instead of crashing.
+      if (typeof google === 'undefined' || !google.maps || !google.maps.Map) {
+        document.getElementById('map').innerHTML =
+          '<div style="height:100%;display:flex;align-items:center;justify-content:center;' +
+          'background:#fff0f3;border-radius:10px;color:#e75480;font-weight:600;font-size:14px;text-align:center;padding:20px;">' +
+          '🗺️ Map unavailable<br><span style="font-size:12px;color:#999;font-weight:400;margin-top:6px;">' +
+          'JFK ✈️ → LHR</span></div>';
+        return;
+      }
+
       // JFK and Heathrow coordinates
       const jfk = { lat: 40.6413, lng: -73.7781 };
       const lhr = { lat: 51.4700, lng: -0.4543 };
@@ -803,40 +806,52 @@
       });
       
       flightPath.setMap(map);
+
+      // Use AdvancedMarkerElement if available (modern), fall back to Marker (still works)
+      const useAdvanced = google.maps.marker && google.maps.marker.AdvancedMarkerElement;
+
+      function makeMarker(position, title, emoji, size, zIndex) {
+        if (useAdvanced) {
+          const el = document.createElement('div');
+          el.style.cssText = 'font-size:' + size + 'px;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));';
+          el.textContent = emoji;
+          return new google.maps.marker.AdvancedMarkerElement({
+            position: position,
+            map: map,
+            title: title,
+            content: el,
+            zIndex: zIndex || 0
+          });
+        }
+        return new google.maps.Marker({
+          position: position,
+          map: map,
+          title: title,
+          label: { text: emoji, fontSize: size + 'px' },
+          zIndex: zIndex || 0
+        });
+      }
       
-      // JFK marker — AdvancedMarkerElement (replaces deprecated google.maps.Marker)
-      new google.maps.marker.AdvancedMarkerElement({
-        position: jfk,
-        map: map,
-        title: 'JFK Airport, New York',
-        content: createMarkerElement('🇺🇸', 20)
-      });
+      // JFK marker
+      makeMarker(jfk, 'JFK Airport, New York', '🇺🇸', 20);
       
-      // Heathrow marker — AdvancedMarkerElement
-      new google.maps.marker.AdvancedMarkerElement({
-        position: lhr,
-        map: map,
-        title: 'Heathrow Airport, London',
-        content: createMarkerElement('🇬🇧', 20)
-      });
+      // Heathrow marker
+      makeMarker(lhr, 'Heathrow Airport, London', '🇬🇧', 20);
       
-      // Plane marker (initially at JFK) — AdvancedMarkerElement
-      planeMarker = new google.maps.marker.AdvancedMarkerElement({
-        position: jfk,
-        map: map,
-        title: 'Flight Position',
-        content: createMarkerElement('✈️', 24),
-        zIndex: 1000
-      });
+      // Plane marker (initially at JFK)
+      planeMarker = makeMarker(jfk, 'Flight Position', '✈️', 24, 1000);
       
       // Start updating plane position
       setInterval(updatePlanePosition, 1000);
     }
     
     function updatePlanePosition() {
+      if (!planeMarker) return; // map may not have loaded
       const now = new Date();
       const jfk = { lat: 40.6413, lng: -73.7781 };
       const lhr = { lat: 51.4700, lng: -0.4543 };
+
+      let target;
       
       if (now >= departure && now < arrival) {
         // During flight - animate plane position
@@ -847,29 +862,30 @@
         // Interpolate along the curved path
         let lat, lng;
         if (progress < 0.33) {
-          // First segment: JFK to mid-Atlantic
           const t = progress / 0.33;
           lat = jfk.lat + (45 - jfk.lat) * t;
           lng = jfk.lng + (-60 - jfk.lng) * t;
         } else if (progress < 0.66) {
-          // Second segment: mid-Atlantic to approach
           const t = (progress - 0.33) / 0.33;
           lat = 45 + (53 - 45) * t;
           lng = -60 + (-30 - (-60)) * t;
         } else {
-          // Final segment: approach to LHR
           const t = (progress - 0.66) / 0.34;
           lat = 53 + (lhr.lat - 53) * t;
           lng = -30 + (lhr.lng - (-30)) * t;
         }
-        
-        planeMarker.position = { lat, lng };
+        target = { lat, lng };
       } else if (now >= arrival) {
-        // Landed at Heathrow
-        planeMarker.position = lhr;
+        target = lhr;
       } else {
-        // Before departure - at JFK
-        planeMarker.position = jfk;
+        target = jfk;
+      }
+
+      // Works for both marker types
+      if (typeof planeMarker.setPosition === 'function') {
+        planeMarker.setPosition(target);
+      } else {
+        planeMarker.position = target;
       }
     }
 
