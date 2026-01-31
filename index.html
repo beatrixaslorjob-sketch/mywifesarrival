@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JFK ✈️ LHR Arrival Countdown ❤️</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 32px 40px;
+      max-width: 460px;
+      width: 92%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      text-align: center;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    h1 {
+      color: #e75480;
+      margin-bottom: 8px;
+    }
+
+    .details {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .countdown {
+      margin-top: 22px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .sub {
+      font-size: 14px;
+      color: #777;
+      margin-top: 8px;
+    }
+
+    .hearts {
+      font-size: 34px;
+      margin-top: 18px;
+    }
+
+    .timezone {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>✈️ JFK → LHR 🇺🇸❤️🇬🇧</h1>
+
+    <div class="details">
+      <strong>Departure:</strong> Wed, 04 March 2026 – 10:15<br />
+      John F. Kennedy Airport (JFK), Terminal 8<br /><br />
+
+      <strong>Arrival:</strong> Wed, 11 March 2026 – 11:20<br />
+      Heathrow Airport (LHR), Terminal 5
+    </div>
+
+    <div class="countdown" id="countdown"></div>
+    <div class="sub" id="flightStatus"></div>
+    <div class="hearts" id="hearts">❤️ ✈️ ❤️</div>
+    <div class="timezone">Time zones handled automatically (NY → London)</div>
+  </div>
+
+  <script>
+    /*
+      Flight details with explicit time zones
+      JFK: America/New_York
+      LHR: Europe/London
+    */
+
+    const departureNY = new Date('2026-03-04T10:15:00-05:00'); // New York (EST)
+    const arrivalLondon = new Date('2026-03-11T11:20:00+00:00'); // London (GMT)
+
+    function updateCountdown() {
+      const now = new Date();
+
+      if (now < departureNY) {
+        const diff = departureNY - now;
+        render(diff, 'Until takeoff from JFK ✈️');
+      } else if (now >= departureNY && now < arrivalLondon) {
+        const diff = arrivalLondon - now;
+        render(diff, 'She is in the air 💕');
+      } else {
+        document.getElementById('countdown').innerHTML = "She's arrived! 💖 Welcome to the UK!";
+        document.getElementById('flightStatus').innerHTML = "Heathrow Terminal 5 🥰";
+        document.getElementById('hearts').innerHTML = "🇬🇧❤️🇺🇸";
+        return;
+      }
+    }
+
+    function render(diff, label) {
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      document.getElementById('countdown').innerHTML =
+        `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      document.getElementById('flightStatus').innerHTML = label;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>
