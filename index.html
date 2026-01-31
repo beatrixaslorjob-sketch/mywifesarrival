@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly" defer></script>
+  <!-- Google Maps loaded dynamically via async bootstrap in <script> below -->
   <style>
     * {
       margin: 0;
@@ -627,10 +627,18 @@
   </div>
 
   <audio id="bgMusic" loop>
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_d1718ab41b.mp3" type="audio/mpeg">
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
   </audio>
 
   <script>
+    // --- Async Google Maps bootstrap (best-practice loading pattern) ---
+    (function() {
+      const s = document.createElement('script');
+      s.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly&loading=async';
+      s.async = true;
+      document.head.appendChild(s);
+    })();
+
     // Flight details
     const departure = new Date('2026-03-04T10:15:00-05:00');
     const arrival = new Date('2026-03-04T22:10:00+00:00');
@@ -696,7 +704,7 @@
         
         const flightPercent = (flightElapsed / flightDuration) * 100;
         document.getElementById('flightProgressFill').style.width = flightPercent + '%';
-        document.getElementById('flightProgressPlane').style.left = `calc(${flightPercent}% - 12px)`;
+        document.querySelector('.flight-progress-plane').style.left = `calc(${flightPercent}% - 12px)`;
         document.getElementById('flightProgressPercent').textContent = Math.round(flightPercent) + '%';
         
         const hoursLeft = Math.floor((arrival - now) / (1000 * 60 * 60));
@@ -732,6 +740,14 @@
     let flightPath;
     let planeMarker;
     
+    // Helper: create a styled DOMElement for AdvancedMarkerElement
+    function createMarkerElement(emoji, size) {
+      const el = document.createElement('div');
+      el.style.cssText = `font-size:${size}px;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));`;
+      el.textContent = emoji;
+      return el;
+    }
+
     function initMap() {
       // JFK and Heathrow coordinates
       const jfk = { lat: 40.6413, lng: -73.7781 };
@@ -788,37 +804,28 @@
       
       flightPath.setMap(map);
       
-      // JFK marker
-      new google.maps.Marker({
+      // JFK marker — AdvancedMarkerElement (replaces deprecated google.maps.Marker)
+      new google.maps.marker.AdvancedMarkerElement({
         position: jfk,
         map: map,
         title: 'JFK Airport, New York',
-        label: {
-          text: '🇺🇸',
-          fontSize: '20px'
-        }
+        content: createMarkerElement('🇺🇸', 20)
       });
       
-      // Heathrow marker
-      new google.maps.Marker({
+      // Heathrow marker — AdvancedMarkerElement
+      new google.maps.marker.AdvancedMarkerElement({
         position: lhr,
         map: map,
         title: 'Heathrow Airport, London',
-        label: {
-          text: '🇬🇧',
-          fontSize: '20px'
-        }
+        content: createMarkerElement('🇬🇧', 20)
       });
       
-      // Plane marker (initially at JFK)
-      planeMarker = new google.maps.Marker({
+      // Plane marker (initially at JFK) — AdvancedMarkerElement
+      planeMarker = new google.maps.marker.AdvancedMarkerElement({
         position: jfk,
         map: map,
         title: 'Flight Position',
-        label: {
-          text: '✈️',
-          fontSize: '24px'
-        },
+        content: createMarkerElement('✈️', 24),
         zIndex: 1000
       });
       
@@ -856,13 +863,13 @@
           lng = -30 + (lhr.lng - (-30)) * t;
         }
         
-        planeMarker.setPosition({ lat, lng });
+        planeMarker.position = { lat, lng };
       } else if (now >= arrival) {
         // Landed at Heathrow
-        planeMarker.setPosition(lhr);
+        planeMarker.position = lhr;
       } else {
         // Before departure - at JFK
-        planeMarker.setPosition(jfk);
+        planeMarker.position = jfk;
       }
     }
 
@@ -1081,13 +1088,6 @@
     const bgMusic = document.getElementById('bgMusic');
     const musicBtn = document.getElementById('musicBtn');
 
-    // Load music preference from localStorage
-    const savedMusicPref = localStorage.getItem('musicPreference');
-    if (savedMusicPref === 'on') {
-      // Don't auto-play, just prepare to play on user interaction
-      musicBtn.textContent = '🔇 Music: OFF (click to enable)';
-    }
-
     function toggleMusic() {
       musicPlaying = !musicPlaying;
       
@@ -1096,7 +1096,6 @@
         bgMusic.play().then(() => {
           musicBtn.textContent = '🔊 Music: ON';
           musicBtn.classList.add('active');
-          localStorage.setItem('musicPreference', 'on');
         }).catch(err => {
           console.log('Music playback failed:', err);
           musicPlaying = false;
@@ -1107,7 +1106,6 @@
         bgMusic.pause();
         musicBtn.textContent = '🔇 Music: OFF';
         musicBtn.classList.remove('active');
-        localStorage.setItem('musicPreference', 'off');
       }
     }
   </script>
