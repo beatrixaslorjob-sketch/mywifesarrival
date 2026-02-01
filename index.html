@@ -360,6 +360,145 @@
       background: linear-gradient(135deg, #10b981, #059669);
     }
 
+    .temp-toggle {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      padding: 4px;
+      gap: 4px;
+      margin-top: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .temp-toggle button {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: transparent;
+      color: #999;
+      -webkit-appearance: none;
+      touch-action: manipulation;
+    }
+
+    .temp-toggle button.active {
+      background: linear-gradient(135deg, #e75480, #ff6b9d);
+      color: white;
+      box-shadow: 0 2px 8px rgba(231, 84, 128, 0.3);
+    }
+
+    .temp-toggle button:active {
+      transform: scale(0.95);
+    }
+
+    .message-section {
+      background: linear-gradient(135deg, #fff5f7, #ffe9ec);
+      border-radius: 15px;
+      padding: 15px;
+      margin: 15px 0;
+      border: 2px solid #ffb3c1;
+    }
+
+    .message-header {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e75480;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .message-input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ffb3c1;
+      border-radius: 12px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 60px;
+      transition: border-color 0.3s ease;
+    }
+
+    .message-input:focus {
+      outline: none;
+      border-color: #e75480;
+      box-shadow: 0 0 0 3px rgba(231, 84, 128, 0.1);
+    }
+
+    .message-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .message-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      -webkit-appearance: none;
+      touch-action: manipulation;
+    }
+
+    .message-btn.save {
+      background: linear-gradient(135deg, #e75480, #ff6b9d);
+      color: white;
+      box-shadow: 0 4px 15px rgba(231, 84, 128, 0.3);
+    }
+
+    .message-btn.clear {
+      background: white;
+      color: #999;
+      border: 2px solid #e0e0e0;
+    }
+
+    .message-btn:active {
+      transform: scale(0.95);
+    }
+
+    .message-display {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+      text-align: left;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      display: none;
+    }
+
+    .message-display.active {
+      display: block;
+    }
+
+    .message-display strong {
+      color: #e75480;
+    }
+
+    .edit-message-btn {
+      background: transparent;
+      border: none;
+      color: #e75480;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: 8px;
+      padding: 0;
+      font-weight: 600;
+    }
+
     .progress-bar-container {
       background: #f0f0f0;
       border-radius: 15px;
@@ -617,6 +756,32 @@
       </div>
     </div>
 
+    <div class="message-section">
+      <div class="message-header">💌 Leave a Message</div>
+      <div id="messageInputSection">
+        <textarea 
+          id="messageInput" 
+          class="message-input" 
+          placeholder="Write a sweet message for Beatrix..."
+          maxlength="500"></textarea>
+        <div class="message-buttons">
+          <button class="message-btn save" onclick="saveMessage()">💝 Save Message</button>
+          <button class="message-btn clear" onclick="clearMessage()">🗑️ Clear</button>
+        </div>
+      </div>
+      <div id="messageDisplay" class="message-display">
+        <strong>Your Message:</strong><br>
+        <span id="messageText"></span>
+        <br>
+        <button class="edit-message-btn" onclick="editMessage()">✏️ Edit Message</button>
+      </div>
+    </div>
+
+    <div class="temp-toggle">
+      <button id="tempC" class="active" onclick="setTempUnit('C')">°C</button>
+      <button id="tempF" onclick="setTempUnit('F')">°F</button>
+    </div>
+
     <button class="music-toggle" id="musicBtn" onclick="toggleMusic()">🔇 Music: OFF</button>
   </div>
 
@@ -625,6 +790,13 @@
   </audio>
 
   <script>
+    // Temperature unit preference
+    let tempUnit = 'C'; // Default to Celsius
+    let weatherData = {
+      ny: { temp_c: null, temp_f: null, weather_code: null, is_day: null },
+      lon: { temp_c: null, temp_f: null, weather_code: null, is_day: null }
+    };
+
     // Flight details
     const departure = new Date('2026-03-04T10:15:00-05:00');
     const arrival = new Date('2026-03-04T22:10:00+00:00');
@@ -872,20 +1044,51 @@
         const nyData = await nyResponse.json();
         
         if (nyData.current) {
-          document.getElementById('nyTemp').textContent = Math.round(nyData.current.temperature_2m) + '°F';
-          document.getElementById('nyWeatherIcon').textContent = getWeatherIcon(nyData.current.weather_code, nyData.current.is_day);
+          weatherData.ny.temp_f = Math.round(nyData.current.temperature_2m);
+          weatherData.ny.temp_c = Math.round((nyData.current.temperature_2m - 32) * 5/9);
+          weatherData.ny.weather_code = nyData.current.weather_code;
+          weatherData.ny.is_day = nyData.current.is_day;
         }
 
         const lonResponse = await fetch('https://api.open-meteo.com/v1/forecast?latitude=51.4700&longitude=-0.4543&current=temperature_2m,weather_code,is_day&temperature_unit=celsius&timezone=Europe/London');
         const lonData = await lonResponse.json();
         
         if (lonData.current) {
-          document.getElementById('lonTemp').textContent = Math.round(lonData.current.temperature_2m) + '°C';
-          document.getElementById('lonWeatherIcon').textContent = getWeatherIcon(lonData.current.weather_code, lonData.current.is_day);
+          weatherData.lon.temp_c = Math.round(lonData.current.temperature_2m);
+          weatherData.lon.temp_f = Math.round(lonData.current.temperature_2m * 9/5 + 32);
+          weatherData.lon.weather_code = lonData.current.weather_code;
+          weatherData.lon.is_day = lonData.current.is_day;
         }
+
+        updateWeatherDisplay();
       } catch (error) {
         console.error('Weather fetch error:', error);
       }
+    }
+
+    function updateWeatherDisplay() {
+      if (weatherData.ny.temp_c !== null) {
+        const nyTemp = tempUnit === 'C' ? weatherData.ny.temp_c : weatherData.ny.temp_f;
+        document.getElementById('nyTemp').textContent = nyTemp + '°' + tempUnit;
+        document.getElementById('nyWeatherIcon').textContent = getWeatherIcon(weatherData.ny.weather_code, weatherData.ny.is_day);
+      }
+
+      if (weatherData.lon.temp_c !== null) {
+        const lonTemp = tempUnit === 'C' ? weatherData.lon.temp_c : weatherData.lon.temp_f;
+        document.getElementById('lonTemp').textContent = lonTemp + '°' + tempUnit;
+        document.getElementById('lonWeatherIcon').textContent = getWeatherIcon(weatherData.lon.weather_code, weatherData.lon.is_day);
+      }
+    }
+
+    function setTempUnit(unit) {
+      tempUnit = unit;
+      
+      // Update button states
+      document.getElementById('tempC').classList.toggle('active', unit === 'C');
+      document.getElementById('tempF').classList.toggle('active', unit === 'F');
+      
+      // Update display
+      updateWeatherDisplay();
     }
 
     fetchWeather();
@@ -973,6 +1176,42 @@
 
     window.addEventListener('resize', () => {
       resizeCanvas();
+    });
+
+    // Message functions
+    function saveMessage() {
+      const messageInput = document.getElementById('messageInput');
+      const message = messageInput.value.trim();
+      
+      if (message) {
+        localStorage.setItem('beatrixMessage', message);
+        document.getElementById('messageText').textContent = message;
+        document.getElementById('messageInputSection').style.display = 'none';
+        document.getElementById('messageDisplay').classList.add('active');
+      }
+    }
+
+    function clearMessage() {
+      document.getElementById('messageInput').value = '';
+    }
+
+    function editMessage() {
+      document.getElementById('messageInputSection').style.display = 'block';
+      document.getElementById('messageDisplay').classList.remove('active');
+      const savedMessage = localStorage.getItem('beatrixMessage');
+      if (savedMessage) {
+        document.getElementById('messageInput').value = savedMessage;
+      }
+    }
+
+    // Load saved message on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedMessage = localStorage.getItem('beatrixMessage');
+      if (savedMessage) {
+        document.getElementById('messageText').textContent = savedMessage;
+        document.getElementById('messageInputSection').style.display = 'none';
+        document.getElementById('messageDisplay').classList.add('active');
+      }
     });
 
     // Music control
