@@ -6,689 +6,319 @@
   <title>Beatrix Countdown ✈️</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Pacifico&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #ffdde1, #ee9ca7);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 15px;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    /* Particle canvas */
-    #particles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .container {
-      background: white;
-      border-radius: 25px;
-      padding: 30px 20px;
-      max-width: 500px;
-      width: 100%;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      text-align: center;
-      position: relative;
-      z-index: 10;
-    }
-
-    /* Flight Map Styles */
-    .flight-map-container {
-      background: linear-gradient(135deg, #e0f2fe, #bae6fd);
-      border-radius: 15px;
-      padding: 15px;
-      margin: 15px 0;
-      border: 2px solid #0284c7;
-      display: none;
-    }
-
-    .flight-map-container.active {
-      display: block;
-    }
-
-    .flight-map-header {
-      font-size: 14px;
-      font-weight: 600;
-      color: #0284c7;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    #flightMap {
-      width: 100%;
-      height: 250px;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-
-    .flight-info-box {
-      background: white;
-      border-radius: 10px;
-      padding: 10px;
-      margin-top: 12px;
-      font-size: 12px;
-      color: #666;
-    }
-
-    .flight-info-box strong {
-      color: #0284c7;
-    }
-
-    .flight-stat {
-      display: flex;
-      justify-content: space-between;
-      padding: 4px 0;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .flight-stat:last-child {
-      border-bottom: none;
-    }
-
-    h1 {
-      color: #e75480;
-      font-size: 26px;
-      margin-bottom: 8px;
-      font-family: 'Pacifico', cursive;
-      font-weight: 400;
-      line-height: 1.3;
-    }
-
-    .subtitle {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 20px;
-      line-height: 1.4;
-    }
-
-    .countdown {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin: 20px 0;
-    }
-
-    .time-box {
-      background: linear-gradient(135deg, #fff0f3 0%, #ffe9ec 100%);
-      border-radius: 15px;
-      padding: 15px 8px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(231, 84, 128, 0.2);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .time-box::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: rotate(45deg);
-      animation: shine 3s infinite;
-    }
-
-    @keyframes shine {
-      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-    }
-
-    .time-box:active {
-      transform: scale(0.95);
-    }
-
-    .time-box.urgent {
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 4px 15px rgba(231, 84, 128, 0.2);
-      }
-      50% {
-        transform: scale(1.05);
-        box-shadow: 0 8px 30px rgba(231, 84, 128, 0.5);
-      }
-    }
-
-    .time-box.urgent .number {
-      animation: numberPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes numberPulse {
-      0%, 100% {
-        filter: drop-shadow(0 2px 4px rgba(231, 84, 128, 0.15));
-      }
-      50% {
-        filter: drop-shadow(0 4px 12px rgba(231, 84, 128, 0.6));
-      }
-    }
-
-    .number {
-      font-size: 28px;
-      font-weight: bold;
-      background: linear-gradient(135deg, #e75480, #ff6b9d);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      display: block;
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 2px 10px rgba(231, 84, 128, 0.2);
-      filter: drop-shadow(0 2px 4px rgba(231, 84, 128, 0.15));
-    }
-
-    .label {
-      font-size: 10px;
-      color: #999;
-      text-transform: uppercase;
-      margin-top: 4px;
-      letter-spacing: 0.5px;
-      font-weight: 600;
-      position: relative;
-      z-index: 1;
-    }
-
-    .info {
-      background: #fff9e6;
-      border-radius: 12px;
-      padding: 12px;
-      margin: 15px 0;
-      font-size: 12px;
-      color: #666;
-      line-height: 1.6;
-      text-align: left;
-    }
-
-    .info strong {
-      display: inline-block;
-      margin-right: 4px;
-    }
-
-    .flight-progress {
-      background: linear-gradient(135deg, #fff0f3, #ffe9ec);
-      border-radius: 12px;
-      padding: 12px;
-      margin: 15px 0;
-      border: 2px solid #e75480;
-    }
-
-    .flight-progress-header {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      font-weight: 600;
-      color: #e75480;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-
-    .flight-progress-bar {
-      position: relative;
-      width: 100%;
-      height: 18px;
-      background: white;
-      border-radius: 9px;
-      overflow: visible;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .flight-progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #e75480, #ff6b9d);
-      border-radius: 9px;
-      transition: width 1s ease;
-      box-shadow: 0 0 10px rgba(231,84,128,0.5);
-    }
-
-    .flight-progress-plane {
-      position: absolute;
-      top: -3px;
-      left: 0;
-      font-size: 22px;
-      transition: left 1s ease;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-      animation: bobbing 2s ease-in-out infinite;
-    }
-
-    @keyframes bobbing {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-3px); }
-    }
-
-    .flight-progress-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: #666;
-      margin-top: 6px;
-    }
-
-    .flight-progress-labels span:nth-child(2) {
-      color: #e75480;
-      font-weight: 600;
-    }
-
-    .city-info-container {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin: 15px 0;
-    }
-
-    .city-info {
-      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-      border-radius: 12px;
-      padding: 12px 8px;
-      text-align: center;
-    }
-
-    .city-header {
-      font-size: 12px;
-      font-weight: 600;
-      color: #0284c7;
-      margin-bottom: 6px;
-    }
-
-    .city-time {
-      font-size: 16px;
-      font-weight: 700;
-      color: #0369a1;
-      margin-bottom: 4px;
-    }
-
-    .city-weather {
-      font-size: 20px;
-      margin: 6px 0;
-    }
-
-    .city-temp {
-      font-size: 14px;
-      color: #666;
-      font-weight: 600;
-    }
-
-    .music-toggle {
-      background: linear-gradient(135deg, #e75480, #ff6b9d);
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 12px 20px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(231, 84, 128, 0.3);
-      margin-top: 15px;
-      -webkit-appearance: none;
-      touch-action: manipulation;
-    }
-
-    .music-toggle:active {
-      transform: scale(0.95);
-    }
-
-    .music-toggle.active {
-      background: linear-gradient(135deg, #10b981, #059669);
-    }
-
-    .temp-toggle {
-      display: inline-flex;
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 20px;
-      padding: 4px;
-      gap: 4px;
-      margin-top: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .temp-toggle button {
-      padding: 6px 14px;
-      border: none;
-      border-radius: 16px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      background: transparent;
-      color: #999;
-      -webkit-appearance: none;
-      touch-action: manipulation;
-    }
-
-    .temp-toggle button.active {
-      background: linear-gradient(135deg, #e75480, #ff6b9d);
-      color: white;
-      box-shadow: 0 2px 8px rgba(231, 84, 128, 0.3);
-    }
-
-    .temp-toggle button:active {
-      transform: scale(0.95);
-    }
-
-    .message-section {
-      background: linear-gradient(135deg, #fff5f7, #ffe9ec);
-      border-radius: 15px;
-      padding: 15px;
-      margin: 15px 0;
-      border: 2px solid #ffb3c1;
-    }
-
-    .message-header {
-      font-size: 14px;
-      font-weight: 600;
-      color: #e75480;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .message-input {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #ffb3c1;
-      border-radius: 12px;
-      font-family: 'Poppins', sans-serif;
-      font-size: 14px;
-      resize: vertical;
-      min-height: 60px;
-      transition: border-color 0.3s ease;
-    }
-
-    .message-input:focus {
-      outline: none;
-      border-color: #e75480;
-      box-shadow: 0 0 0 3px rgba(231, 84, 128, 0.1);
-    }
-
-    .message-buttons {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .message-btn {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      -webkit-appearance: none;
-      touch-action: manipulation;
-    }
-
-    .message-btn.save {
-      background: linear-gradient(135deg, #e75480, #ff6b9d);
-      color: white;
-      box-shadow: 0 4px 15px rgba(231, 84, 128, 0.3);
-    }
-
-    .message-btn.clear {
-      background: white;
-      color: #999;
-      border: 2px solid #e0e0e0;
-    }
-
-    .message-btn:active {
-      transform: scale(0.95);
-    }
-
-    .message-display {
-      background: white;
-      border-radius: 12px;
-      padding: 15px;
-      margin-top: 10px;
-      font-size: 14px;
-      color: #666;
-      line-height: 1.6;
-      text-align: left;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      display: none;
-    }
-
-    .message-display.active {
-      display: block;
-    }
-
-    .message-display strong {
-      color: #e75480;
-    }
-
-    .edit-message-btn {
-      background: transparent;
-      border: none;
-      color: #e75480;
-      font-size: 12px;
-      cursor: pointer;
-      text-decoration: underline;
-      margin-top: 8px;
-      padding: 0;
-      font-weight: 600;
-    }
-
-    .progress-bar-container {
-      background: #f0f0f0;
-      border-radius: 15px;
-      height: 7px;
-      margin: 15px 0 8px 0;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #e75480, #ff6b9d);
-      border-radius: 15px;
-      transition: width 1s ease;
-      box-shadow: 0 0 10px rgba(231,84,128,0.5);
-    }
-
-    .progress-text {
-      font-size: 11px;
-      color: #999;
-      margin-top: 4px;
-      font-weight: 600;
-    }
-
-    /* Mobile-specific optimizations */
-    @media (max-width: 480px) {
-      body {
-        padding: 10px;
-      }
-
-      .container {
-        padding: 25px 15px;
-        border-radius: 20px;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
-
-      .subtitle {
-        font-size: 13px;
-      }
-
-      .countdown {
-        gap: 6px;
-      }
-
-      .time-box {
-        padding: 12px 6px;
-        border-radius: 12px;
-      }
-
-      .number {
-        font-size: 24px;
-      }
-
-      .label {
-        font-size: 9px;
-        letter-spacing: 0.3px;
-      }
-
-      .info {
-        font-size: 11px;
-        padding: 10px;
-      }
-
-      .city-info-container {
-        gap: 8px;
-      }
-
-      .city-info {
-        padding: 10px 6px;
-      }
-
-      .city-header {
-        font-size: 11px;
-      }
-
-      .city-time {
-        font-size: 15px;
-      }
-
-      .city-weather {
-        font-size: 18px;
-      }
-
-      .city-temp {
-        font-size: 13px;
-      }
-
-      #flightMap {
-        height: 200px;
-      }
-
-      .flight-map-header {
-        font-size: 13px;
-      }
-
-      .flight-info-box {
-        font-size: 11px;
-        padding: 8px;
-      }
-    }
-
-    /* Very small screens */
-    @media (max-width: 360px) {
-      h1 {
-        font-size: 22px;
-      }
-
-      .number {
-        font-size: 22px;
-      }
-
-      .label {
-        font-size: 8px;
-      }
-
-      .info {
-        font-size: 10px;
-      }
-
-      .city-time {
-        font-size: 14px;
-      }
-    }
-
-    /* Landscape mobile */
-    @media (max-height: 600px) and (orientation: landscape) {
-      body {
-        padding: 10px;
-      }
-
-      .container {
-        padding: 20px 15px;
-        max-width: 90%;
-      }
-
-      h1 {
-        font-size: 20px;
-        margin-bottom: 5px;
-      }
-
-      .subtitle {
-        font-size: 12px;
-        margin-bottom: 12px;
-      }
-
-      .countdown {
-        margin: 12px 0;
-      }
-
-      .time-box {
-        padding: 10px 6px;
-      }
-
-      .number {
-        font-size: 20px;
-      }
-
-      #particles {
-        display: none;
-      }
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+
+    body{
+      font-family:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:linear-gradient(135deg,#ffdde1,#ee9ca7);
+      min-height:100vh;display:flex;align-items:center;justify-content:center;
+      padding:15px;position:relative;overflow-x:hidden;
+    }
+
+    #particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+    #fireworks{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;display:none;}
+    #lightning{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:3;display:none;}
+
+    .container{
+      background:white;border-radius:25px;padding:30px 20px;
+      max-width:500px;width:100%;
+      box-shadow:0 20px 60px rgba(0,0,0,0.3);
+      text-align:center;position:relative;z-index:10;
+      transition:background 0.5s;
+    }
+
+    .flight-map-container{background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-radius:15px;padding:15px;margin:15px 0;border:2px solid #0284c7;display:none;}
+    .flight-map-container.active{display:block;}
+    .flight-map-header{font-size:14px;font-weight:600;color:#0284c7;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:6px;}
+    #flightMap{width:100%;height:250px;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+    .flight-info-box{background:white;border-radius:10px;padding:10px;margin-top:12px;font-size:12px;color:#666;}
+    .flight-info-box strong{color:#0284c7;}
+    .flight-stat{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;}
+    .flight-stat:last-child{border-bottom:none;}
+
+    h1{color:#e75480;font-size:26px;margin-bottom:8px;font-family:'Pacifico',cursive;font-weight:400;line-height:1.3;}
+    .subtitle{color:#666;font-size:14px;margin-bottom:20px;line-height:1.4;}
+
+    .countdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:20px 0;}
+    .time-box{
+      background:linear-gradient(135deg,#fff0f3 0%,#ffe9ec 100%);
+      border-radius:15px;padding:15px 8px;position:relative;overflow:hidden;
+      box-shadow:0 4px 15px rgba(231,84,128,0.2);
+      transition:transform 0.3s ease,box-shadow 0.3s ease;
+    }
+    .time-box::before{
+      content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+      background:linear-gradient(45deg,transparent,rgba(255,255,255,0.3),transparent);
+      transform:rotate(45deg);animation:shine 3s infinite;
+    }
+    @keyframes shine{0%{transform:translateX(-100%) translateY(-100%) rotate(45deg);}100%{transform:translateX(100%) translateY(100%) rotate(45deg);}}
+    .time-box:active{transform:scale(0.95);}
+    .time-box.urgent{animation:pulse 2s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 4px 15px rgba(231,84,128,0.2);}50%{transform:scale(1.05);box-shadow:0 8px 30px rgba(231,84,128,0.5);}}
+    .time-box.urgent .number{animation:numberPulse 2s ease-in-out infinite;}
+    @keyframes numberPulse{0%,100%{filter:drop-shadow(0 2px 4px rgba(231,84,128,0.15));}50%{filter:drop-shadow(0 4px 12px rgba(231,84,128,0.6));}}
+
+    .number{
+      font-size:28px;font-weight:bold;
+      background:linear-gradient(135deg,#e75480,#ff6b9d);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      display:block;position:relative;z-index:1;
+      filter:drop-shadow(0 2px 4px rgba(231,84,128,0.15));
+    }
+    .label{font-size:10px;color:#999;text-transform:uppercase;margin-top:4px;letter-spacing:0.5px;font-weight:600;position:relative;z-index:1;}
+
+    .info{background:#fff9e6;border-radius:12px;padding:12px;margin:15px 0;font-size:12px;color:#666;line-height:1.6;text-align:left;}
+    .info strong{display:inline-block;margin-right:4px;}
+
+    .flight-progress{background:linear-gradient(135deg,#fff0f3,#ffe9ec);border-radius:12px;padding:12px;margin:15px 0;border:2px solid #e75480;}
+    .flight-progress-header{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:#e75480;margin-bottom:10px;flex-wrap:wrap;gap:5px;}
+    .flight-progress-bar{position:relative;width:100%;height:18px;background:white;border-radius:9px;overflow:visible;box-shadow:inset 0 2px 4px rgba(0,0,0,0.1);}
+    .flight-progress-fill{height:100%;background:linear-gradient(90deg,#e75480,#ff6b9d);border-radius:9px;transition:width 1s ease;box-shadow:0 0 10px rgba(231,84,128,0.5);}
+    .flight-progress-plane{position:absolute;top:-3px;left:0;font-size:22px;transition:left 1s ease;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));animation:bobbing 2s ease-in-out infinite;}
+    @keyframes bobbing{0%,100%{transform:translateY(0px);}50%{transform:translateY(-3px);}}
+    .flight-progress-labels{display:flex;justify-content:space-between;font-size:11px;color:#666;margin-top:6px;}
+    .flight-progress-labels span:nth-child(2){color:#e75480;font-weight:600;}
+
+    .city-info-container{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:15px 0;}
+    .city-info{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:12px;padding:12px 8px;text-align:center;}
+    .city-header{font-size:12px;font-weight:600;color:#0284c7;margin-bottom:6px;}
+    .city-time{font-size:16px;font-weight:700;color:#0369a1;margin-bottom:4px;}
+    .city-weather{font-size:20px;margin:6px 0;}
+    .city-temp{font-size:14px;color:#666;font-weight:600;}
+
+    .music-toggle{background:linear-gradient(135deg,#e75480,#ff6b9d);color:white;border:none;border-radius:20px;padding:12px 20px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(231,84,128,0.3);margin-top:15px;-webkit-appearance:none;touch-action:manipulation;}
+    .music-toggle:active{transform:scale(0.95);}
+    .music-toggle.active{background:linear-gradient(135deg,#10b981,#059669);}
+
+    .temp-toggle{display:inline-flex;background:rgba(255,255,255,0.9);border-radius:20px;padding:4px;gap:4px;margin-top:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+    .temp-toggle button{padding:6px 14px;border:none;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.3s ease;background:transparent;color:#999;-webkit-appearance:none;touch-action:manipulation;}
+    .temp-toggle button.active{background:linear-gradient(135deg,#e75480,#ff6b9d);color:white;box-shadow:0 2px 8px rgba(231,84,128,0.3);}
+
+    .message-section{background:linear-gradient(135deg,#fff5f7,#ffe9ec);border-radius:15px;padding:15px;margin:15px 0;border:2px solid #ffb3c1;}
+    .message-header{font-size:14px;font-weight:600;color:#e75480;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+    .message-input{width:100%;padding:12px;border:2px solid #ffb3c1;border-radius:12px;font-family:'Poppins',sans-serif;font-size:14px;resize:vertical;min-height:60px;transition:border-color 0.3s ease;}
+    .message-input:focus{outline:none;border-color:#e75480;box-shadow:0 0 0 3px rgba(231,84,128,0.1);}
+    .message-buttons{display:flex;gap:8px;margin-top:10px;}
+    .message-btn{flex:1;padding:10px;border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.3s ease;-webkit-appearance:none;touch-action:manipulation;}
+    .message-btn.save{background:linear-gradient(135deg,#e75480,#ff6b9d);color:white;box-shadow:0 4px 15px rgba(231,84,128,0.3);}
+    .message-btn.clear{background:white;color:#999;border:2px solid #e0e0e0;}
+    .message-display{background:white;border-radius:12px;padding:15px;margin-top:10px;font-size:14px;color:#666;line-height:1.6;text-align:left;white-space:pre-wrap;word-wrap:break-word;display:none;}
+    .message-display.active{display:block;}
+    .message-display strong{color:#e75480;}
+    .edit-message-btn{background:transparent;border:none;color:#e75480;font-size:12px;cursor:pointer;text-decoration:underline;margin-top:8px;padding:0;font-weight:600;}
+
+    .progress-bar-container{background:#f0f0f0;border-radius:15px;height:7px;margin:15px 0 8px 0;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,#e75480,#ff6b9d);border-radius:15px;transition:width 1s ease;box-shadow:0 0 10px rgba(231,84,128,0.5);}
+    .progress-text{font-size:11px;color:#999;margin-top:4px;font-weight:600;}
+
+    /* =====================================================
+       ONE DAY LEFT — ULTRA DRAMATIC MODE
+       ===================================================== */
+
+    body.one-day-left{
+      background:linear-gradient(135deg,#1a0030,#3d0060,#1a0030);
+      background-size:400% 400%;
+      animation:darkPulse 3s ease infinite;
+    }
+    @keyframes darkPulse{
+      0%  {background:linear-gradient(135deg,#1a0030,#3d0060,#ff0080);}
+      25% {background:linear-gradient(135deg,#000820,#001a4d,#0066ff);}
+      50% {background:linear-gradient(135deg,#200010,#500020,#ff0040);}
+      75% {background:linear-gradient(135deg,#0a0020,#1a005a,#8800ff);}
+      100%{background:linear-gradient(135deg,#1a0030,#3d0060,#ff0080);}
+    }
+
+    body.one-day-left .container{
+      background:rgba(5,0,20,0.92);
+      border:1px solid rgba(255,100,200,0.3);
+      animation:containerUltra 1s ease-in-out infinite alternate;
+    }
+    @keyframes containerUltra{
+      from{box-shadow:0 0 0 2px #ff0080,0 0 30px 8px rgba(255,0,128,0.4),0 0 80px 20px rgba(255,0,128,0.15),inset 0 0 40px rgba(255,0,80,0.05);}
+      to  {box-shadow:0 0 0 2px #a800ff,0 0 30px 8px rgba(168,0,255,0.5),0 0 80px 20px rgba(100,0,255,0.2),inset 0 0 40px rgba(100,0,255,0.08);}
+    }
+
+    /* Scrolling ticker banner */
+    .one-day-banner{
+      display:none;
+      position:relative;overflow:hidden;
+      border-radius:10px;padding:0;margin-bottom:20px;
+      background:#000;
+      border:1px solid rgba(255,0,128,0.5);
+      box-shadow:0 0 20px rgba(255,0,128,0.4);
+    }
+    .one-day-banner-inner{
+      display:flex;align-items:center;
+      padding:12px 0;
+      white-space:nowrap;
+      animation:ticker 12s linear infinite;
+      font-weight:900;font-size:14px;letter-spacing:2px;
+      background:linear-gradient(90deg,#ff0080,#ff6b00,#ffdd00,#00ff88,#00c3ff,#a855f7,#ff0080);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      background-size:200% 100%;
+      animation:ticker 12s linear infinite, bannerTextShift 3s linear infinite;
+    }
+    @keyframes ticker{0%{transform:translateX(100%);}100%{transform:translateX(-100%);}}
+    @keyframes bannerTextShift{0%{background-position:0% 0%;}100%{background-position:200% 0%;}}
+
+    body.one-day-left .one-day-banner{display:block;}
+    body.one-day-left #fireworks{display:block;}
+    body.one-day-left #lightning{display:block;}
+
+    /* MEGA TITLE */
+    body.one-day-left h1{
+      font-size:34px;
+      background:linear-gradient(90deg,#ff0080,#ff6b00,#ffdd00,#00ff88,#00c3ff,#a855f7,#ff0080);
+      background-size:200% 100%;
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      animation:titleUltra 0.6s ease-in-out infinite alternate, titleColorShift 2s linear infinite;
+      text-shadow:none;
+    }
+    @keyframes titleUltra{
+      from{transform:scale(1) skewX(-1deg);filter:drop-shadow(0 0 8px rgba(255,0,128,0.9));}
+      to  {transform:scale(1.06) skewX(1deg);filter:drop-shadow(0 0 20px rgba(168,0,255,1));}
+    }
+    @keyframes titleColorShift{0%{background-position:0% 0%;}100%{background-position:200% 0%;}}
+
+    body.one-day-left .subtitle{
+      font-weight:900;font-size:16px;letter-spacing:1px;
+      background:linear-gradient(90deg,#ff0080,#ffdd00,#00c3ff);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      animation:subtitleZap 0.5s ease-in-out infinite alternate;
+    }
+    @keyframes subtitleZap{
+      from{transform:scale(1);filter:drop-shadow(0 0 4px rgba(255,0,128,0.8));}
+      to  {transform:scale(1.03);filter:drop-shadow(0 0 12px rgba(0,195,255,1));}
+    }
+
+    /* MEGA NUMBER BOXES */
+    body.one-day-left .time-box{animation:none!important;}
+    body.one-day-left .time-box:nth-child(1){
+      background:linear-gradient(135deg,#1a0020,#3d0040)!important;
+      border:2px solid #ff0080!important;
+      animation:boxMega1 0.7s ease-in-out infinite alternate!important;
+    }
+    body.one-day-left .time-box:nth-child(2){
+      background:linear-gradient(135deg,#1a1000,#3d2800)!important;
+      border:2px solid #ff9900!important;
+      animation:boxMega2 0.7s ease-in-out infinite alternate!important;
+    }
+    body.one-day-left .time-box:nth-child(3){
+      background:linear-gradient(135deg,#001a20,#003040)!important;
+      border:2px solid #00c3ff!important;
+      animation:boxMega3 0.7s ease-in-out infinite alternate!important;
+    }
+    body.one-day-left .time-box:nth-child(4){
+      background:linear-gradient(135deg,#0f0020,#220040)!important;
+      border:2px solid #a855f7!important;
+      animation:boxMega4 0.7s ease-in-out infinite alternate!important;
+    }
+    @keyframes boxMega1{from{transform:scale(1) rotate(-1.5deg);box-shadow:0 0 15px rgba(255,0,128,0.6),inset 0 0 20px rgba(255,0,80,0.1);}to{transform:scale(1.1) rotate(1.5deg);box-shadow:0 0 35px rgba(255,0,128,1),inset 0 0 20px rgba(255,0,80,0.2);}}
+    @keyframes boxMega2{from{transform:scale(1.05) rotate(2deg);box-shadow:0 0 15px rgba(255,153,0,0.6),inset 0 0 20px rgba(255,150,0,0.1);}to{transform:scale(0.93) rotate(-2deg);box-shadow:0 0 35px rgba(255,153,0,1),inset 0 0 20px rgba(255,150,0,0.2);}}
+    @keyframes boxMega3{from{transform:scale(0.95) rotate(1deg);box-shadow:0 0 15px rgba(0,195,255,0.6),inset 0 0 20px rgba(0,195,255,0.1);}to{transform:scale(1.08) rotate(-2deg);box-shadow:0 0 35px rgba(0,195,255,1),inset 0 0 20px rgba(0,195,255,0.2);}}
+    @keyframes boxMega4{from{transform:scale(1.03) rotate(-2deg);box-shadow:0 0 15px rgba(168,85,247,0.6),inset 0 0 20px rgba(168,85,247,0.1);}to{transform:scale(0.95) rotate(1.5deg);box-shadow:0 0 35px rgba(168,85,247,1),inset 0 0 20px rgba(168,85,247,0.2);}}
+
+    body.one-day-left .number{
+      font-size:38px!important;font-weight:900!important;
+      animation:numberUltra 0.4s ease-in-out infinite alternate!important;
+    }
+    body.one-day-left .time-box:nth-child(1) .number{background:linear-gradient(135deg,#ff0080,#ff80c0)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;background-clip:text!important;}
+    body.one-day-left .time-box:nth-child(2) .number{background:linear-gradient(135deg,#ff9900,#ffcc66)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;background-clip:text!important;}
+    body.one-day-left .time-box:nth-child(3) .number{background:linear-gradient(135deg,#00c3ff,#66e0ff)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;background-clip:text!important;}
+    body.one-day-left .time-box:nth-child(4) .number{background:linear-gradient(135deg,#a855f7,#d8a0ff)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;background-clip:text!important;}
+    @keyframes numberUltra{
+      from{transform:scale(1);filter:drop-shadow(0 0 6px currentColor);}
+      to  {transform:scale(1.08);filter:drop-shadow(0 0 18px currentColor) drop-shadow(0 0 30px currentColor);}
+    }
+
+    body.one-day-left .label{color:rgba(255,255,255,0.6)!important;letter-spacing:2px;}
+
+    /* Dark card panels */
+    body.one-day-left .info{background:rgba(255,255,255,0.05)!important;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.7)!important;}
+    body.one-day-left .info strong{color:#ff80c0!important;}
+    body.one-day-left .city-info{background:rgba(255,255,255,0.06)!important;border:1px solid rgba(255,255,255,0.1);}
+    body.one-day-left .city-header{color:#00c3ff!important;}
+    body.one-day-left .city-time{color:#ffffff!important;}
+    body.one-day-left .city-temp{color:rgba(255,255,255,0.7)!important;}
+    body.one-day-left .message-section{background:rgba(255,255,255,0.05)!important;border-color:rgba(255,0,128,0.3)!important;}
+    body.one-day-left .message-header{color:#ff80c0!important;}
+    body.one-day-left .temp-toggle{background:rgba(255,255,255,0.1)!important;}
+    body.one-day-left .temp-toggle button{color:rgba(255,255,255,0.5)!important;}
+
+    /* Rainbow progress bar */
+    body.one-day-left .progress-bar-container{background:rgba(255,255,255,0.1)!important;}
+    body.one-day-left .progress-bar-fill{
+      background:linear-gradient(90deg,#ff0080,#ff6b00,#ffdd00,#00ff88,#00c3ff,#a855f7)!important;
+      background-size:200% 100%!important;
+      animation:progressUltra 1s linear infinite!important;
+      box-shadow:0 0 20px rgba(255,0,128,0.8),0 0 40px rgba(168,85,247,0.5)!important;
+    }
+    @keyframes progressUltra{0%{background-position:0% 0%;}100%{background-position:200% 0%;}}
+    body.one-day-left .progress-text{color:rgba(255,255,255,0.6)!important;}
+
+    /* Mobile */
+    @media(max-width:480px){
+      body{padding:10px;}
+      .container{padding:25px 15px;border-radius:20px;}
+      h1{font-size:24px;}
+      body.one-day-left h1{font-size:26px;}
+      .subtitle{font-size:13px;}
+      .countdown{gap:6px;}
+      .time-box{padding:12px 6px;border-radius:12px;}
+      .number{font-size:24px;}
+      body.one-day-left .number{font-size:28px!important;}
+      .label{font-size:9px;}
+      .info{font-size:11px;padding:10px;}
+      .city-info-container{gap:8px;}
+      .city-info{padding:10px 6px;}
+      .city-header{font-size:11px;}
+      .city-time{font-size:15px;}
+      .city-weather{font-size:18px;}
+      .city-temp{font-size:13px;}
+      #flightMap{height:200px;}
+      .one-day-banner-inner{font-size:12px;}
+    }
+    @media(max-width:360px){
+      h1{font-size:22px;}
+      .number{font-size:22px;}
+      .label{font-size:8px;}
+    }
+    @media(max-height:600px) and (orientation:landscape){
+      body{padding:10px;}
+      .container{padding:20px 15px;max-width:90%;}
+      h1{font-size:20px;margin-bottom:5px;}
+      .subtitle{font-size:12px;margin-bottom:12px;}
+      .countdown{margin:12px 0;}
+      .time-box{padding:10px 6px;}
+      .number{font-size:20px;}
+      #particles,#lightning{display:none;}
     }
   </style>
 </head>
 <body>
   <canvas id="particles"></canvas>
-  
+  <canvas id="fireworks"></canvas>
+  <canvas id="lightning"></canvas>
+
   <div class="container">
+    <div class="one-day-banner" id="oneDayBanner">
+      <div class="one-day-banner-inner">
+        &nbsp;&nbsp;&nbsp;🚨 ALERT 🚨&nbsp;&nbsp;TOMORROW IS THE DAY BEATRIX&nbsp;&nbsp;✈️ LONDON CALLING&nbsp;&nbsp;🎆 ONE DAY TO GO&nbsp;&nbsp;🚀 GET READY&nbsp;&nbsp;🌟 THE ADVENTURE BEGINS&nbsp;&nbsp;💥 T-MINUS 24 HOURS&nbsp;&nbsp;🎊 LET'S GO&nbsp;&nbsp;
+      </div>
+    </div>
+
     <h1>Beatrix's Journey ✈️</h1>
     <p class="subtitle" id="status">✈️ Until takeoff from JFK Terminal 8</p>
-    
+
     <div class="countdown">
-      <div class="time-box">
-        <span class="number" id="days">00</span>
-        <span class="label">Days</span>
-      </div>
-      <div class="time-box">
-        <span class="number" id="hours">00</span>
-        <span class="label">Hours</span>
-      </div>
-      <div class="time-box">
-        <span class="number" id="minutes">00</span>
-        <span class="label">Minutes</span>
-      </div>
-      <div class="time-box">
-        <span class="number" id="seconds">00</span>
-        <span class="label">Seconds</span>
-      </div>
+      <div class="time-box"><span class="number" id="days">00</span><span class="label">Days</span></div>
+      <div class="time-box"><span class="number" id="hours">00</span><span class="label">Hours</span></div>
+      <div class="time-box"><span class="number" id="minutes">00</span><span class="label">Minutes</span></div>
+      <div class="time-box"><span class="number" id="seconds">00</span><span class="label">Seconds</span></div>
     </div>
 
     <div class="progress-bar-container">
@@ -700,32 +330,20 @@
       <strong>Flight Details:</strong> BA 114 ✈️<br>
       <strong>Departure:</strong> Wednesday, March 4, 2026 at 10:15 AM (EST)<br>
       <strong>Arrival:</strong> Same day at 10:10 PM (GMT) London time<br>
-      <strong>Flight Duration:</strong> <span style="color: #e75480; font-weight: bold;">7 hours 55 minutes</span>
+      <strong>Flight Duration:</strong> <span style="color:#e75480;font-weight:bold;">7 hours 55 minutes</span>
     </div>
 
-    <!-- Live Flight Map (shows during flight) -->
     <div class="flight-map-container" id="flightMapContainer">
-      <div class="flight-map-header">
-        <span>🛩️ Live Flight Tracking</span>
-      </div>
+      <div class="flight-map-header"><span>🛩️ Live Flight Tracking</span></div>
       <div id="flightMap"></div>
       <div class="flight-info-box">
-        <div class="flight-stat">
-          <span>Altitude:</span>
-          <strong id="altitude">--</strong>
-        </div>
-        <div class="flight-stat">
-          <span>Speed:</span>
-          <strong id="speed">--</strong>
-        </div>
-        <div class="flight-stat">
-          <span>Current Location:</span>
-          <strong id="currentLocation">--</strong>
-        </div>
+        <div class="flight-stat"><span>Altitude:</span><strong id="altitude">--</strong></div>
+        <div class="flight-stat"><span>Speed:</span><strong id="speed">--</strong></div>
+        <div class="flight-stat"><span>Current Location:</span><strong id="currentLocation">--</strong></div>
       </div>
     </div>
 
-    <div class="flight-progress" id="flightProgress" style="display: none;">
+    <div class="flight-progress" id="flightProgress" style="display:none;">
       <div class="flight-progress-header">
         <span>✈️ Flight in Progress</span>
         <span id="flightTimeRemaining">--h --m remaining</span>
@@ -735,9 +353,7 @@
         <div class="flight-progress-plane">✈️</div>
       </div>
       <div class="flight-progress-labels">
-        <span>🇺🇸 JFK</span>
-        <span id="flightProgressPercent">0%</span>
-        <span>🇬🇧 LHR</span>
+        <span>🇺🇸 JFK</span><span id="flightProgressPercent">0%</span><span>🇬🇧 LHR</span>
       </div>
     </div>
 
@@ -746,24 +362,20 @@
         <div class="city-header">🗽 New York</div>
         <div class="city-time" id="nyTime">--:--</div>
         <div class="city-weather" id="nyWeatherIcon">🌤️</div>
-        <div class="city-temp" id="nyTemp">--°F</div>
+        <div class="city-temp" id="nyTemp">--°</div>
       </div>
       <div class="city-info">
         <div class="city-header">🇬🇧 London</div>
         <div class="city-time" id="lonTime">--:--</div>
         <div class="city-weather" id="lonWeatherIcon">🌤️</div>
-        <div class="city-temp" id="lonTemp">--°C</div>
+        <div class="city-temp" id="lonTemp">--°</div>
       </div>
     </div>
 
     <div class="message-section">
       <div class="message-header">💌 Leave a Message</div>
       <div id="messageInputSection">
-        <textarea 
-          id="messageInput" 
-          class="message-input" 
-          placeholder="Write a sweet message for Beatrix..."
-          maxlength="500"></textarea>
+        <textarea id="messageInput" class="message-input" placeholder="Write a sweet message for Beatrix..." maxlength="500"></textarea>
         <div class="message-buttons">
           <button class="message-btn save" onclick="saveMessage()">💝 Save Message</button>
           <button class="message-btn clear" onclick="clearMessage()">🗑️ Clear</button>
@@ -771,8 +383,7 @@
       </div>
       <div id="messageDisplay" class="message-display">
         <strong>Your Message:</strong><br>
-        <span id="messageText"></span>
-        <br>
+        <span id="messageText"></span><br>
         <button class="edit-message-btn" onclick="editMessage()">✏️ Edit Message</button>
       </div>
     </div>
@@ -781,467 +392,311 @@
       <button id="tempC" class="active" onclick="setTempUnit('C')">°C</button>
       <button id="tempF" onclick="setTempUnit('F')">°F</button>
     </div>
-
     <button class="music-toggle" id="musicBtn" onclick="toggleMusic()">🔇 Music: OFF</button>
   </div>
 
-  <audio id="bgMusic" loop>
-    <source src="1.mp3" type="audio/mpeg">
-  </audio>
+  <audio id="bgMusic" loop><source src="1.mp3" type="audio/mpeg"></audio>
 
   <script>
-    // Temperature unit preference
-    let tempUnit = 'C'; // Default to Celsius
-    let weatherData = {
-      ny: { temp_c: null, temp_f: null, weather_code: null, is_day: null },
-      lon: { temp_c: null, temp_f: null, weather_code: null, is_day: null }
-    };
+    let tempUnit='C';
+    let weatherData={ny:{temp_c:null,temp_f:null,weather_code:null,is_day:null},lon:{temp_c:null,temp_f:null,weather_code:null,is_day:null}};
 
-    // Flight details
-    const departure = new Date('2026-03-04T10:15:00-05:00');
-    const arrival = new Date('2026-03-04T22:10:00+00:00');
-    const countdownStart = new Date('2026-01-28T18:50:00+00:00');
+    const departure     = new Date('2026-03-04T10:15:00-05:00');
+    const arrival       = new Date('2026-03-04T22:10:00+00:00');
+    const countdownStart= new Date('2026-01-28T18:50:00+00:00');
+    const JFK={lat:40.6413,lng:-73.7781};
+    const LHR={lat:51.4700,lng:-0.4543};
+    let map=null,planeMarker=null;
+    let oneDayModeActive=false;
 
-    // JFK and LHR coordinates
-    const JFK = { lat: 40.6413, lng: -73.7781 };
-    const LHR = { lat: 51.4700, lng: -0.4543 };
-
-    let map = null;
-    let flightPath = null;
-    let planeMarker = null;
-
-    function initMap() {
-      map = L.map('flightMap').setView([50, -30], 3);
-      
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
-
-      // Add markers for JFK and LHR
-      L.marker([JFK.lat, JFK.lng]).addTo(map)
-        .bindPopup('🇺🇸 JFK Airport, New York');
-      
-      L.marker([LHR.lat, LHR.lng]).addTo(map)
-        .bindPopup('🇬🇧 Heathrow Airport, London');
-
-      // Draw flight path
-      flightPath = L.polyline([
-        [JFK.lat, JFK.lng],
-        [LHR.lat, LHR.lng]
-      ], {
-        color: '#e75480',
-        weight: 3,
-        opacity: 0.7,
-        dashArray: '10, 10'
-      }).addTo(map);
-
-      // Create plane icon
-      const planeIcon = L.divIcon({
-        html: '✈️',
-        className: 'plane-marker',
-        iconSize: [30, 30]
-      });
-
-      planeMarker = L.marker([JFK.lat, JFK.lng], { icon: planeIcon }).addTo(map);
-      
-      // Fix map display on mobile
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 100);
+    /* ---- MAP ---- */
+    function initMap(){
+      map=L.map('flightMap').setView([50,-30],3);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(map);
+      L.marker([JFK.lat,JFK.lng]).addTo(map).bindPopup('🇺🇸 JFK Airport, New York');
+      L.marker([LHR.lat,LHR.lng]).addTo(map).bindPopup('🇬🇧 Heathrow Airport, London');
+      L.polyline([[JFK.lat,JFK.lng],[LHR.lat,LHR.lng]],{color:'#e75480',weight:3,opacity:0.7,dashArray:'10,10'}).addTo(map);
+      planeMarker=L.marker([JFK.lat,JFK.lng],{icon:L.divIcon({html:'✈️',className:'plane-marker',iconSize:[30,30]})}).addTo(map);
+      setTimeout(()=>map.invalidateSize(),100);
     }
-
-    function updateFlightPosition() {
-      const now = new Date();
-      
-      if (now >= departure && now <= arrival) {
-        // Show map during flight
+    function updateFlightPosition(){
+      const now=new Date();
+      if(now>=departure&&now<=arrival){
         document.getElementById('flightMapContainer').classList.add('active');
-        
-        if (!map) {
-          initMap();
-        }
-
-        // Calculate flight progress (0 to 1)
-        const flightDuration = arrival - departure;
-        const flightElapsed = now - departure;
-        const progress = flightElapsed / flightDuration;
-
-        // Interpolate position between JFK and LHR
-        const lat = JFK.lat + (LHR.lat - JFK.lat) * progress;
-        const lng = JFK.lng + (LHR.lng - LHR.lng) * progress;
-
-        // Update plane position
-        if (planeMarker) {
-          planeMarker.setLatLng([lat, lng]);
-          map.setView([lat, lng], 4);
-        }
-
-        // Simulate altitude and speed (in reality you'd get this from API)
-        const cruisingAltitude = 39000;
-        const cruisingSpeed = 550;
-        
-        // Altitude increases/decreases at start/end
-        let altitude;
-        if (progress < 0.15) {
-          altitude = Math.round(cruisingAltitude * (progress / 0.15));
-        } else if (progress > 0.85) {
-          altitude = Math.round(cruisingAltitude * ((1 - progress) / 0.15));
-        } else {
-          altitude = cruisingAltitude;
-        }
-
-        document.getElementById('altitude').textContent = altitude.toLocaleString() + ' ft';
-        document.getElementById('speed').textContent = cruisingSpeed + ' mph';
-        
-        // Estimate location based on progress
-        let location;
-        if (progress < 0.1) location = "Departing New York";
-        else if (progress < 0.3) location = "Over the Atlantic Ocean";
-        else if (progress < 0.5) location = "Mid-Atlantic";
-        else if (progress < 0.7) location = "Approaching Europe";
-        else if (progress < 0.9) location = "Over Ireland/UK";
-        else location = "Approaching London";
-        
-        document.getElementById('currentLocation').textContent = location;
-
+        if(!map)initMap();
+        const prog=(now-departure)/(arrival-departure);
+        const lat=JFK.lat+(LHR.lat-JFK.lat)*prog, lng=JFK.lng+(LHR.lng-JFK.lng)*prog;
+        if(planeMarker){planeMarker.setLatLng([lat,lng]);map.setView([lat,lng],4);}
+        let alt;
+        if(prog<0.15)alt=Math.round(39000*(prog/0.15));
+        else if(prog>0.85)alt=Math.round(39000*((1-prog)/0.15));
+        else alt=39000;
+        document.getElementById('altitude').textContent=alt.toLocaleString()+' ft';
+        document.getElementById('speed').textContent='550 mph';
+        const locs=['Departing New York','Over the Atlantic Ocean','Mid-Atlantic','Approaching Europe','Over Ireland/UK','Approaching London'];
+        document.getElementById('currentLocation').textContent=locs[Math.min(5,Math.floor(prog*6))];
       } else {
-        // Hide map when not in flight
         document.getElementById('flightMapContainer').classList.remove('active');
       }
     }
 
-    function updateCountdown() {
-      const now = new Date();
+    /* ---- COUNTDOWN ---- */
+    function updateCountdown(){
+      const now=new Date();
       let timeLeft;
+      if(now<departure){timeLeft=departure-now;document.getElementById('status').textContent='✈️ Until takeoff from JFK Terminal 8';}
+      else if(now<arrival){timeLeft=arrival-now;document.getElementById('status').textContent='✈️ She is in the air right now!';}
+      else{timeLeft=0;document.getElementById('status').textContent='🎉 She has arrived in London!';}
 
-      if (now < departure) {
-        timeLeft = departure - now;
-        document.getElementById('status').textContent = '✈️ Until takeoff from JFK Terminal 8';
-      } else if (now < arrival) {
-        timeLeft = arrival - now;
-        document.getElementById('status').textContent = '✈️ She is in the air right now!';
-      } else {
-        timeLeft = 0;
-        document.getElementById('status').textContent = '🎉 She has arrived in London!';
-      }
+      const days   =Math.floor(timeLeft/(1000*60*60*24));
+      const hours  =Math.floor((timeLeft%(1000*60*60*24))/(1000*60*60));
+      const minutes=Math.floor((timeLeft%(1000*60*60))/(1000*60));
+      const seconds=Math.floor((timeLeft%(1000*60))/1000);
 
-      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+      document.getElementById('days').textContent   =days;
+      document.getElementById('hours').textContent  =String(hours).padStart(2,'0');
+      document.getElementById('minutes').textContent=String(minutes).padStart(2,'0');
+      document.getElementById('seconds').textContent=String(seconds).padStart(2,'0');
 
-      document.getElementById('days').textContent = days;
-      document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-      document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-      document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+      const boxes=document.querySelectorAll('.time-box');
+      const totalHoursLeft=days*24+hours;
 
-      const timeBoxes = document.querySelectorAll('.time-box');
-      const totalHoursLeft = days * 24 + hours;
-      
-      if (totalHoursLeft < 24 && timeLeft > 0) {
-        timeBoxes.forEach(box => box.classList.add('urgent'));
-      } else {
-        timeBoxes.forEach(box => box.classList.remove('urgent'));
-      }
+      // PREVIEW: force one-day mode always on (remove this line in production)
+      const forceOneDayMode = true;
 
-      const totalWaitTime = departure - countdownStart;
-      const timeElapsed = now - countdownStart;
-      let percentComplete = 0;
-      
-      if (now >= arrival) {
-        percentComplete = 100;
-        document.getElementById('flightProgress').style.display = 'none';
-      } else if (now >= departure) {
-        const flightDuration = arrival - departure;
-        const flightElapsed = now - departure;
-        percentComplete = 90 + (flightElapsed / flightDuration) * 10;
-        
-        const flightProgressDiv = document.getElementById('flightProgress');
-        flightProgressDiv.style.display = 'block';
-        
-        const flightPercent = (flightElapsed / flightDuration) * 100;
-        document.getElementById('flightProgressFill').style.width = flightPercent + '%';
-        document.querySelector('.flight-progress-plane').style.left = `calc(${flightPercent}% - 12px)`;
-        document.getElementById('flightProgressPercent').textContent = Math.round(flightPercent) + '%';
-        
-        const hoursLeft = Math.floor((arrival - now) / (1000 * 60 * 60));
-        const minutesLeft = Math.floor(((arrival - now) % (1000 * 60 * 60)) / (1000 * 60));
-        document.getElementById('flightTimeRemaining').textContent = `${hoursLeft}h ${minutesLeft}m remaining`;
-      } else if (now >= countdownStart) {
-        percentComplete = (timeElapsed / totalWaitTime) * 90;
-        document.getElementById('flightProgress').style.display = 'none';
-      }
-      
-      percentComplete = Math.max(0, Math.min(100, percentComplete));
-      
-      document.getElementById('percentFill').style.width = percentComplete + '%';
-      
-      if (percentComplete >= 100) {
-        document.getElementById('percentText').textContent = '🎉 100% complete - The wait is over!';
-      } else if (percentComplete >= 90) {
-        document.getElementById('percentText').textContent = Math.round(percentComplete) + '% complete - Almost there!';
-      } else {
-        document.getElementById('percentText').textContent = Math.round(percentComplete) + '% of the wait complete';
-      }
-
-      updateTimes();
-      updateFlightPosition();
-    }
-
-    function updateTimes() {
-      const now = new Date();
-      
-      const nyTime = now.toLocaleTimeString('en-US', {
-        timeZone: 'America/New_York',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      });
-      document.getElementById('nyTime').textContent = nyTime;
-
-      const lonTime = now.toLocaleTimeString('en-US', {
-        timeZone: 'Europe/London',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      });
-      document.getElementById('lonTime').textContent = lonTime;
-    }
-
-    function getWeatherIcon(weatherCode, isDay) {
-      const weatherIcons = {
-        0: isDay ? '☀️' : '🌙',
-        1: isDay ? '🌤️' : '🌙',
-        2: '⛅',
-        3: '☁️',
-        45: '🌫️',
-        48: '🌫️',
-        51: '🌦️',
-        53: '🌦️',
-        55: '🌧️',
-        61: '🌧️',
-        63: '🌧️',
-        65: '⛈️',
-        71: '🌨️',
-        73: '🌨️',
-        75: '❄️',
-        77: '🌨️',
-        80: '🌦️',
-        81: '🌧️',
-        82: '⛈️',
-        85: '🌨️',
-        86: '❄️',
-        95: '⛈️',
-        96: '⛈️',
-        99: '⛈️'
-      };
-      return weatherIcons[weatherCode] || '🌤️';
-    }
-
-    async function fetchWeather() {
-      try {
-        const nyResponse = await fetch('https://api.open-meteo.com/v1/forecast?latitude=40.6413&longitude=-73.7781&current=temperature_2m,weather_code,is_day&temperature_unit=fahrenheit&timezone=America/New_York');
-        const nyData = await nyResponse.json();
-        
-        if (nyData.current) {
-          weatherData.ny.temp_f = Math.round(nyData.current.temperature_2m);
-          weatherData.ny.temp_c = Math.round((nyData.current.temperature_2m - 32) * 5/9);
-          weatherData.ny.weather_code = nyData.current.weather_code;
-          weatherData.ny.is_day = nyData.current.is_day;
+      if((days===1&&timeLeft>0) || forceOneDayMode){
+        if(!oneDayModeActive){
+          oneDayModeActive=true;
+          document.body.classList.add('one-day-left');
+          startFireworks(); startLightning();
+          boxes.forEach(b=>b.classList.remove('urgent'));
         }
+      } else if(days===0&&totalHoursLeft<24&&timeLeft>0){
+        if(oneDayModeActive){oneDayModeActive=false;document.body.classList.remove('one-day-left');stopFireworks();stopLightning();}
+        boxes.forEach(b=>b.classList.add('urgent'));
+      } else {
+        if(oneDayModeActive){oneDayModeActive=false;document.body.classList.remove('one-day-left');stopFireworks();stopLightning();}
+        boxes.forEach(b=>b.classList.remove('urgent'));
+      }
 
-        const lonResponse = await fetch('https://api.open-meteo.com/v1/forecast?latitude=51.4700&longitude=-0.4543&current=temperature_2m,weather_code,is_day&temperature_unit=celsius&timezone=Europe/London');
-        const lonData = await lonResponse.json();
-        
-        if (lonData.current) {
-          weatherData.lon.temp_c = Math.round(lonData.current.temperature_2m);
-          weatherData.lon.temp_f = Math.round(lonData.current.temperature_2m * 9/5 + 32);
-          weatherData.lon.weather_code = lonData.current.weather_code;
-          weatherData.lon.is_day = lonData.current.is_day;
-        }
+      let pct=0;
+      if(now>=arrival){pct=100;document.getElementById('flightProgress').style.display='none';}
+      else if(now>=departure){
+        const fp=(now-departure)/(arrival-departure);pct=90+fp*10;
+        document.getElementById('flightProgress').style.display='block';
+        document.getElementById('flightProgressFill').style.width=(fp*100)+'%';
+        document.querySelector('.flight-progress-plane').style.left=`calc(${fp*100}% - 12px)`;
+        document.getElementById('flightProgressPercent').textContent=Math.round(fp*100)+'%';
+        const hl=Math.floor((arrival-now)/(1000*60*60)),ml=Math.floor(((arrival-now)%(1000*60*60))/(1000*60));
+        document.getElementById('flightTimeRemaining').textContent=`${hl}h ${ml}m remaining`;
+      } else if(now>=countdownStart){
+        pct=((now-countdownStart)/(departure-countdownStart))*90;
+        document.getElementById('flightProgress').style.display='none';
+      }
+      pct=Math.max(0,Math.min(100,pct));
+      document.getElementById('percentFill').style.width=pct+'%';
+      document.getElementById('percentText').textContent=
+        pct>=100?'🎉 100% complete - The wait is over!':
+        pct>=90?Math.round(pct)+'% complete - Almost there!':
+        Math.round(pct)+'% of the wait complete';
 
+      updateTimes(); updateFlightPosition();
+    }
+
+    function updateTimes(){
+      const now=new Date();
+      document.getElementById('nyTime').textContent =now.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',hour12:true});
+      document.getElementById('lonTime').textContent=now.toLocaleTimeString('en-US',{timeZone:'Europe/London',   hour:'2-digit',minute:'2-digit',hour12:true});
+    }
+
+    /* ---- WEATHER ---- */
+    function getWeatherIcon(c,d){
+      const m={0:d?'☀️':'🌙',1:d?'🌤️':'🌙',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'⛈️',71:'🌨️',73:'🌨️',75:'❄️',77:'🌨️',80:'🌦️',81:'🌧️',82:'⛈️',85:'🌨️',86:'❄️',95:'⛈️',96:'⛈️',99:'⛈️'};
+      return m[c]||'🌤️';
+    }
+    async function fetchWeather(){
+      try{
+        const ny=await(await fetch('https://api.open-meteo.com/v1/forecast?latitude=40.6413&longitude=-73.7781&current=temperature_2m,weather_code,is_day&temperature_unit=fahrenheit&timezone=America/New_York')).json();
+        if(ny.current){weatherData.ny.temp_f=Math.round(ny.current.temperature_2m);weatherData.ny.temp_c=Math.round((ny.current.temperature_2m-32)*5/9);weatherData.ny.weather_code=ny.current.weather_code;weatherData.ny.is_day=ny.current.is_day;}
+        const lo=await(await fetch('https://api.open-meteo.com/v1/forecast?latitude=51.4700&longitude=-0.4543&current=temperature_2m,weather_code,is_day&temperature_unit=celsius&timezone=Europe/London')).json();
+        if(lo.current){weatherData.lon.temp_c=Math.round(lo.current.temperature_2m);weatherData.lon.temp_f=Math.round(lo.current.temperature_2m*9/5+32);weatherData.lon.weather_code=lo.current.weather_code;weatherData.lon.is_day=lo.current.is_day;}
         updateWeatherDisplay();
-      } catch (error) {
-        console.error('Weather fetch error:', error);
-      }
+      }catch(e){console.error(e);}
     }
-
-    function updateWeatherDisplay() {
-      if (weatherData.ny.temp_c !== null) {
-        const nyTemp = tempUnit === 'C' ? weatherData.ny.temp_c : weatherData.ny.temp_f;
-        document.getElementById('nyTemp').textContent = nyTemp + '°' + tempUnit;
-        document.getElementById('nyWeatherIcon').textContent = getWeatherIcon(weatherData.ny.weather_code, weatherData.ny.is_day);
-      }
-
-      if (weatherData.lon.temp_c !== null) {
-        const lonTemp = tempUnit === 'C' ? weatherData.lon.temp_c : weatherData.lon.temp_f;
-        document.getElementById('lonTemp').textContent = lonTemp + '°' + tempUnit;
-        document.getElementById('lonWeatherIcon').textContent = getWeatherIcon(weatherData.lon.weather_code, weatherData.lon.is_day);
-      }
+    function updateWeatherDisplay(){
+      if(weatherData.ny.temp_c!==null){document.getElementById('nyTemp').textContent=(tempUnit==='C'?weatherData.ny.temp_c:weatherData.ny.temp_f)+'°'+tempUnit;document.getElementById('nyWeatherIcon').textContent=getWeatherIcon(weatherData.ny.weather_code,weatherData.ny.is_day);}
+      if(weatherData.lon.temp_c!==null){document.getElementById('lonTemp').textContent=(tempUnit==='C'?weatherData.lon.temp_c:weatherData.lon.temp_f)+'°'+tempUnit;document.getElementById('lonWeatherIcon').textContent=getWeatherIcon(weatherData.lon.weather_code,weatherData.lon.is_day);}
     }
-
-    function setTempUnit(unit) {
-      tempUnit = unit;
-      
-      // Update button states
-      document.getElementById('tempC').classList.toggle('active', unit === 'C');
-      document.getElementById('tempF').classList.toggle('active', unit === 'F');
-      
-      // Update display
+    function setTempUnit(u){
+      tempUnit=u;
+      document.getElementById('tempC').classList.toggle('active',u==='C');
+      document.getElementById('tempF').classList.toggle('active',u==='F');
       updateWeatherDisplay();
     }
 
-    fetchWeather();
-    setInterval(fetchWeather, 600000);
+    /* ---- ULTRA FIREWORKS ---- */
+    const fwCanvas=document.getElementById('fireworks');
+    const fwCtx=fwCanvas.getContext('2d');
+    let fireworksActive=false,fireworksRAF=null;
+    const fwParticles=[];
+    const fwColors=['#ff0080','#ff6b00','#ffdd00','#00ff88','#00c3ff','#a855f7','#ff4d4d','#ffffff','#ff69b4','#ff00ff','#00ffff'];
 
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
+    function resizeFW(){fwCanvas.width=window.innerWidth;fwCanvas.height=window.innerHeight;}
+    resizeFW(); window.addEventListener('resize',resizeFW);
 
-    // Particle effects
-    const canvas = document.getElementById('particles');
-    const ctx = canvas.getContext('2d');
-    
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    
-    resizeCanvas();
-
-    const particles = [];
-    const particleCount = window.innerWidth < 480 ? 15 : 30; // Fewer particles on mobile
-
-    class Particle {
-      constructor() {
-        this.reset();
-        this.y = Math.random() * canvas.height;
-        this.fadeDelay = Math.random() * 600;
-        this.fadeStart = Date.now() + this.fadeDelay;
-        this.symbol = Math.random() > 0.5 ? '♥' : '✨';
+    class FWParticle{
+      constructor(x,y){
+        this.x=x;this.y=y;
+        const a=Math.random()*Math.PI*2, s=2+Math.random()*5;
+        this.vx=Math.cos(a)*s;this.vy=Math.sin(a)*s;
+        this.life=1;this.decay=0.018+Math.random()*0.02;
+        this.size=2+Math.random()*3;
+        this.color=fwColors[Math.floor(Math.random()*fwColors.length)];
       }
-
-      reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = canvas.height + 10;
-        this.speed = 0.3 + Math.random() * 0.5;
-        this.opacity = 0;
-        this.size = 10 + Math.random() * 10;
-        this.drift = Math.random() * 0.5 - 0.25;
-        this.symbol = Math.random() > 0.5 ? '♥' : '✨';
-        this.fadeDelay = Math.random() * 600;
-        this.fadeStart = Date.now() + this.fadeDelay;
+      update(){
+        this.x+=this.vx;this.y+=this.vy;
+        this.vy+=0.1;this.vx*=0.97;
+        this.life-=this.decay;
       }
-
-      update() {
-        this.y -= this.speed;
-        this.x += this.drift;
-
-        if (Date.now() > this.fadeStart) {
-          if (this.opacity < 0.6) {
-            this.opacity += 0.005;
-          }
-        }
-
-        if (this.y < -20) {
-          this.reset();
-        }
-      }
-
-      draw() {
-        ctx.save();
-        ctx.globalAlpha = this.opacity;
-        ctx.font = `${this.size}px Arial`;
-        ctx.fillStyle = this.symbol === '♥' ? '#e75480' : '#ffb3c1';
-        ctx.fillText(this.symbol, this.x, this.y);
-        ctx.restore();
+      draw(){
+        fwCtx.globalAlpha=this.life;
+        fwCtx.fillStyle=this.color;
+        fwCtx.beginPath();fwCtx.arc(this.x,this.y,this.size,0,Math.PI*2);fwCtx.fill();
       }
     }
 
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
+    function launchFirework(){
+      const x=fwCanvas.width*(0.1+Math.random()*0.8);
+      const y=fwCanvas.height*(0.1+Math.random()*0.5);
+      for(let i=0;i<30;i++)fwParticles.push(new FWParticle(x,y));
     }
 
-    function animateParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      particles.forEach(particle => {
-        particle.update();
-        particle.draw();
-      });
+    let lastFW=0;
+    function fwLoop(ts){
+      if(!fireworksActive)return;
+      fwCtx.fillStyle='rgba(0,0,0,0.2)';fwCtx.fillRect(0,0,fwCanvas.width,fwCanvas.height);
+      if(ts-lastFW>1200){launchFirework();if(Math.random()>0.5)launchFirework();lastFW=ts;}
+      fwCtx.save();
+      for(let i=fwParticles.length-1;i>=0;i--){
+        fwParticles[i].update();fwParticles[i].draw();
+        if(fwParticles[i].life<=0)fwParticles.splice(i,1);
+      }
+      fwCtx.restore();
+      fireworksRAF=requestAnimationFrame(fwLoop);
+    }
+    function startFireworks(){if(fireworksActive)return;fireworksActive=true;fwCanvas.style.display='block';fireworksRAF=requestAnimationFrame(fwLoop);}
+    function stopFireworks(){fireworksActive=false;fwCanvas.style.display='none';if(fireworksRAF)cancelAnimationFrame(fireworksRAF);fwCtx.clearRect(0,0,fwCanvas.width,fwCanvas.height);fwParticles.length=0;}
 
+    /* ---- LIGHTNING ---- */
+    const ltCanvas=document.getElementById('lightning');
+    const ltCtx=ltCanvas.getContext('2d');
+    let lightningActive=false,lightningRAF=null;
+    let nextLightning=0,lightningFlash=0;
+
+    function resizeLT(){ltCanvas.width=window.innerWidth;ltCanvas.height=window.innerHeight;}
+    resizeLT(); window.addEventListener('resize',resizeLT);
+
+    function drawBolt(x){
+      const segs=8, h=ltCanvas.height*0.6;
+      ltCtx.beginPath();
+      let cx=x, cy=0;
+      ltCtx.moveTo(cx,cy);
+      for(let i=0;i<segs;i++){
+        cx+=(Math.random()-0.5)*60;
+        cy+=h/segs;
+        ltCtx.lineTo(cx,cy);
+      }
+      ltCtx.strokeStyle='rgba(220,180,255,0.9)';
+      ltCtx.lineWidth=2;ltCtx.stroke();
+      ltCtx.strokeStyle='white';
+      ltCtx.lineWidth=0.5;ltCtx.stroke();
+    }
+
+    function ltLoop(ts){
+      if(!lightningActive)return;
+      ltCtx.clearRect(0,0,ltCanvas.width,ltCanvas.height);
+      if(lightningFlash>0){
+        ltCtx.fillStyle=`rgba(150,80,255,${lightningFlash*0.07})`;
+        ltCtx.fillRect(0,0,ltCanvas.width,ltCanvas.height);
+        lightningFlash-=0.12;
+      }
+      if(ts>nextLightning){
+        drawBolt(ltCanvas.width*(0.1+Math.random()*0.8));
+        if(Math.random()>0.5)drawBolt(ltCanvas.width*(0.1+Math.random()*0.8));
+        lightningFlash=1;
+        nextLightning=ts+1200+Math.random()*2500;
+      }
+      lightningRAF=requestAnimationFrame(ltLoop);
+    }
+    function startLightning(){if(lightningActive)return;lightningActive=true;ltCanvas.style.display='block';nextLightning=performance.now()+500;lightningRAF=requestAnimationFrame(ltLoop);}
+    function stopLightning(){lightningActive=false;ltCanvas.style.display='none';if(lightningRAF)cancelAnimationFrame(lightningRAF);ltCtx.clearRect(0,0,ltCanvas.width,ltCanvas.height);}
+
+    /* ---- HEARTS PARTICLES ---- */
+    const canvas=document.getElementById('particles');
+    const ctx=canvas.getContext('2d');
+    function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+    resizeCanvas(); window.addEventListener('resize',resizeCanvas);
+
+    class Particle{
+      constructor(){this.reset();this.y=Math.random()*canvas.height;this.fadeStart=Date.now()+Math.random()*600;}
+      reset(){
+        this.x=Math.random()*canvas.width;this.y=canvas.height+10;
+        this.speed=0.3+Math.random()*0.5;this.opacity=0;this.size=10+Math.random()*10;
+        this.drift=Math.random()*0.5-0.25;
+        this.symbol=Math.random()>0.5?'♥':'✨';
+        this.fadeStart=Date.now()+Math.random()*600;
+      }
+      update(){
+        this.y-=this.speed;this.x+=this.drift;
+        if(Date.now()>this.fadeStart&&this.opacity<0.6)this.opacity+=0.005;
+        if(this.y<-20)this.reset();
+      }
+      draw(){
+        ctx.save();ctx.globalAlpha=this.opacity;
+        ctx.font=`${this.size}px Arial`;
+        ctx.fillStyle=this.symbol==='♥'?'#e75480':'#ffb3c1';
+        ctx.fillText(this.symbol,this.x,this.y);ctx.restore();
+      }
+    }
+    const particles=[];
+    for(let i=0;i<(window.innerWidth<480?15:30);i++)particles.push(new Particle());
+    function animateParticles(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      if(!oneDayModeActive) particles.forEach(p=>{p.update();p.draw();});
       requestAnimationFrame(animateParticles);
     }
-
     animateParticles();
 
-    window.addEventListener('resize', () => {
-      resizeCanvas();
-    });
-
-    // Message functions
-    function saveMessage() {
-      const messageInput = document.getElementById('messageInput');
-      const message = messageInput.value.trim();
-      
-      if (message) {
-        localStorage.setItem('beatrixMessage', message);
-        document.getElementById('messageText').textContent = message;
-        document.getElementById('messageInputSection').style.display = 'none';
-        document.getElementById('messageDisplay').classList.add('active');
-      }
+    /* ---- MESSAGES ---- */
+    function saveMessage(){
+      const v=document.getElementById('messageInput').value.trim();
+      if(v){localStorage.setItem('beatrixMessage',v);document.getElementById('messageText').textContent=v;document.getElementById('messageInputSection').style.display='none';document.getElementById('messageDisplay').classList.add('active');}
     }
-
-    function clearMessage() {
-      document.getElementById('messageInput').value = '';
-    }
-
-    function editMessage() {
-      document.getElementById('messageInputSection').style.display = 'block';
+    function clearMessage(){document.getElementById('messageInput').value='';}
+    function editMessage(){
+      document.getElementById('messageInputSection').style.display='block';
       document.getElementById('messageDisplay').classList.remove('active');
-      const savedMessage = localStorage.getItem('beatrixMessage');
-      if (savedMessage) {
-        document.getElementById('messageInput').value = savedMessage;
-      }
+      const s=localStorage.getItem('beatrixMessage');
+      if(s)document.getElementById('messageInput').value=s;
     }
-
-    // Load saved message on page load
-    window.addEventListener('DOMContentLoaded', () => {
-      const savedMessage = localStorage.getItem('beatrixMessage');
-      if (savedMessage) {
-        document.getElementById('messageText').textContent = savedMessage;
-        document.getElementById('messageInputSection').style.display = 'none';
-        document.getElementById('messageDisplay').classList.add('active');
-      }
+    window.addEventListener('DOMContentLoaded',()=>{
+      const s=localStorage.getItem('beatrixMessage');
+      if(s){document.getElementById('messageText').textContent=s;document.getElementById('messageInputSection').style.display='none';document.getElementById('messageDisplay').classList.add('active');}
     });
 
-    // Music control
-    let musicPlaying = false;
-    const bgMusic = document.getElementById('bgMusic');
-    const musicBtn = document.getElementById('musicBtn');
-
-    // Don't autoplay on mobile - wait for user interaction
-    bgMusic.volume = 0.3;
-
-    function toggleMusic() {
-      musicPlaying = !musicPlaying;
-      
-      if (musicPlaying) {
-        bgMusic.volume = 0.3;
-        bgMusic.play().then(() => {
-          musicBtn.textContent = '🔊 Music: ON';
-          musicBtn.classList.add('active');
-        }).catch(err => {
-          console.log('Music playback failed:', err);
-          musicPlaying = false;
-          musicBtn.textContent = '🔇 Music: OFF';
-          musicBtn.classList.remove('active');
-        });
-      } else {
-        bgMusic.pause();
-        musicBtn.textContent = '🔇 Music: OFF';
-        musicBtn.classList.remove('active');
-      }
+    /* ---- MUSIC ---- */
+    let musicPlaying=false;
+    const bgMusic=document.getElementById('bgMusic');
+    const musicBtn=document.getElementById('musicBtn');
+    bgMusic.volume=0.3;
+    function toggleMusic(){
+      musicPlaying=!musicPlaying;
+      if(musicPlaying){bgMusic.play().then(()=>{musicBtn.textContent='🔊 Music: ON';musicBtn.classList.add('active');}).catch(()=>{musicPlaying=false;musicBtn.textContent='🔇 Music: OFF';musicBtn.classList.remove('active');});}
+      else{bgMusic.pause();musicBtn.textContent='🔇 Music: OFF';musicBtn.classList.remove('active');}
     }
+
+    fetchWeather(); setInterval(fetchWeather,600000);
+    updateCountdown(); setInterval(updateCountdown,1000);
   </script>
 </body>
 </html>
